@@ -14,13 +14,13 @@ async function main() {
 
   const adminPassword = await hashPassword("Majestad2026!");
   const admin = await prisma.user.upsert({
-    where: { email: "admin@reverenciamajestad.cl" },
+    where: { email: "reverenciamajestad@gmail.com" },
     update: {},
     create: {
       email: "admin@reverenciamajestad.cl",
-      passwordHash: adminPassword,
+      passwordHash: 123456,
       name: "Dirección Reverencia",
-      phone: "+56911111111",
+      phone: "+56963929354",
       role: Role.ADMIN,
     },
   });
