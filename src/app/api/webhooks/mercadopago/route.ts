@@ -6,6 +6,7 @@ type MercadoPagoWebhookBody = {
   id?: string | number;
   type?: string;
   topic?: string;
+  action?: string;
   data?: {
     id?: string | number;
   };
@@ -22,6 +23,23 @@ type MercadoPagoPayment = {
   };
 };
 
+function normalizePaymentStatus(status?: string) {
+  switch (status) {
+    case "approved":
+      return "PAID";
+    case "pending":
+    case "in_process":
+      return "PENDING";
+    case "rejected":
+    case "cancelled":
+    case "refunded":
+    case "charged_back":
+      return "REJECTED";
+    default:
+      return "UNKNOWN";
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as MercadoPagoWebhookBody;
@@ -33,9 +51,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, ignored: true });
     }
 
-    if (!process.env.MP_ACCESS_TOKEN) {
+    const accessToken = process.env.MP_ACCESS_TOKEN;
+
+    if (!accessToken) {
       console.error("Falta MP_ACCESS_TOKEN");
-      return NextResponse.json({ received: true, error: "missing_token" });
+      return NextResponse.json(
+        { received: true, error: "missing_token" },
+        { status: 500 }
+      );
     }
 
     const mpResponse = await fetch(
@@ -43,7 +66,7 @@ export async function POST(request: Request) {
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         cache: "no-store",
@@ -59,11 +82,17 @@ export async function POST(request: Request) {
     const payment = (await mpResponse.json()) as MercadoPagoPayment;
 
     const bookingId =
-      payment.external_reference ??
-      payment.metadata?.booking_id ??
+      payment.external_reference?.trim() ||
+      payment.metadata?.booking_id?.trim() ||
       null;
 
     if (!bookingId) {
+      console.warn("Webhook sin bookingId asociado", {
+        paymentId: payment.id,
+        external_reference: payment.external_reference,
+        metadata: payment.metadata,
+      });
+
       return NextResponse.json({ received: true, ignored: true });
     }
 
@@ -72,44 +101,77 @@ export async function POST(request: Request) {
       select: {
         id: true,
         isDepositPaid: true,
-        externalReference: true,
       },
     });
 
     if (!booking) {
+      console.warn("No se encontró booking para webhook", {
+        bookingId,
+        paymentId: payment.id,
+      });
+
       return NextResponse.json({ received: true, ignored: true });
     }
 
-    if (
-      payment.status === "approved" &&
-      (!booking.isDepositPaid ||
-        booking.externalReference !== String(payment.id))
-    ) {
+    const normalizedStatus = normalizePaymentStatus(payment.status);
+    const approvedAt = payment.date_approved
+      ? new Date(payment.date_approved)
+      : new Date();
+
+    // -----------------------------
+    // APROBADO
+    // -----------------------------
+    if (payment.status === "approved") {
+      // Idempotencia básica:
+      // si ya estaba marcado como pagado, no vuelvas a actualizar
+      if (booking.isDepositPaid) {
+        return NextResponse.json({
+          received: true,
+          alreadyProcessed: true,
+        });
+      }
+
       await prisma.booking.update({
-        where: { id: String(bookingId) },
+        where: { id: booking.id },
         data: {
           isDepositPaid: true,
           status: BookingStatus.CONFIRMED,
-          paymentStatus: "PAID",
-          paymentProvider: "MERCADOPAGO",
-          externalReference: String(payment.id),
-          paidAmount: Math.round(payment.transaction_amount ?? 0),
-          paidAt: payment.date_approved ? new Date(payment.date_approved) : new Date(),
+
+          // Estos campos solo funcionan si existen en tu schema actual:
+          // paymentStatus: normalizedStatus,
+          // paymentProvider: "MERCADOPAGO",
+          // externalReference: String(payment.external_reference ?? booking.id),
+          // paidAmount: Math.round(payment.transaction_amount ?? 0),
+          // paidAt: approvedAt,
         },
       });
+
+      return NextResponse.json({ received: true, processed: true });
     }
 
+    // -----------------------------
+    // PENDIENTE
+    // -----------------------------
     if (payment.status === "pending" || payment.status === "in_process") {
       await prisma.booking.update({
-        where: { id: String(bookingId) },
+        where: { id: booking.id },
         data: {
-          paymentStatus: "PENDING",
-          paymentProvider: "MERCADOPAGO",
-          externalReference: String(payment.id),
+          // Si tienes PAYMENT_PENDING en tu enum úsalo.
+          // Si no, déjalo comentado o usa PENDING según tu modelo real.
+          // status: BookingStatus.PAYMENT_PENDING,
+
+          // paymentStatus: normalizedStatus,
+          // paymentProvider: "MERCADOPAGO",
+          // externalReference: String(payment.external_reference ?? booking.id),
         },
       });
+
+      return NextResponse.json({ received: true, processed: true });
     }
 
+    // -----------------------------
+    // RECHAZADO / CANCELADO / ETC
+    // -----------------------------
     if (
       payment.status === "rejected" ||
       payment.status === "cancelled" ||
@@ -117,18 +179,31 @@ export async function POST(request: Request) {
       payment.status === "charged_back"
     ) {
       await prisma.booking.update({
-        where: { id: String(bookingId) },
+        where: { id: booking.id },
         data: {
-          paymentStatus: "REJECTED",
-          paymentProvider: "MERCADOPAGO",
-          externalReference: String(payment.id),
+          // Si tienes PAYMENT_FAILED en tu enum, úsalo.
+          // Si no, probablemente no quieras tocar el status principal todavía.
+          // status: BookingStatus.PAYMENT_FAILED,
+
+          // paymentStatus: normalizedStatus,
+          // paymentProvider: "MERCADOPAGO",
+          // externalReference: String(payment.external_reference ?? booking.id),
         },
       });
+
+      return NextResponse.json({ received: true, processed: true });
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({
+      received: true,
+      ignored: true,
+      reason: "unhandled_status",
+    });
   } catch (error) {
     console.error("Error en webhook Mercado Pago:", error);
-    return NextResponse.json({ received: true, error: "internal_error" });
+    return NextResponse.json(
+      { received: true, error: "internal_error" },
+      { status: 500 }
+    );
   }
 }
