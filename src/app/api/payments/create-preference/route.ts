@@ -12,33 +12,64 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!process.env.MP_ACCESS_TOKEN) {
+      return NextResponse.json(
+        { error: "Falta MP_ACCESS_TOKEN en variables de entorno" },
+        { status: 500 }
+      );
+    }
+
+    if (!process.env.APP_URL) {
+      return NextResponse.json(
+        { error: "Falta APP_URL en variables de entorno" },
+        { status: 500 }
+      );
+    }
+
     const preferencePayload = {
       items: [
         {
           title: "Reserva Reverencia Majestad",
+          description: "Abono de reserva",
           quantity: 1,
           currency_id: "CLP",
           unit_price: Number(amount),
         },
       ],
-      external_reference: bookingId,
+
+      payer: {
+        name: "Cliente Reverencia",
+        email: "test_user_123456@testuser.com",
+      },
+
+      external_reference: String(bookingId),
+
+      metadata: {
+        booking_id: String(bookingId),
+        source: "reverencia-majestad",
+      },
+
       back_urls: {
         success: `${process.env.APP_URL}/checkout/success`,
         failure: `${process.env.APP_URL}/checkout/failure`,
         pending: `${process.env.APP_URL}/checkout/pending`,
       },
+
       auto_return: "approved",
       notification_url: `${process.env.APP_URL}/api/webhooks/mercadopago`,
     };
 
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(preferencePayload),
-    });
+    const response = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify(preferencePayload),
+      }
+    );
 
     const data = await response.json();
 
@@ -46,7 +77,7 @@ export async function POST(req: Request) {
       console.error("Mercado Pago error:", data);
       return NextResponse.json(
         { error: "Error creando preferencia", detail: data },
-        { status: 500 }
+        { status: response.status || 500 }
       );
     }
 
@@ -57,6 +88,9 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Error creando pago:", error);
-    return NextResponse.json({ error: "Error creando pago" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error creando pago" },
+      { status: 500 }
+    );
   }
 }
