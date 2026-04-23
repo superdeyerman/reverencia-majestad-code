@@ -1,62 +1,118 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+type CreatePreferenceBody = {
+  bookingId?: string;
+};
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { amount, bookingId } = body;
+    const body = (await req.json()) as CreatePreferenceBody;
+    const bookingId = body.bookingId?.trim();
 
-    if (!amount || !bookingId) {
+    if (!bookingId) {
       return NextResponse.json(
-        { error: "amount y bookingId son obligatorios" },
+        { error: "bookingId es obligatorio" },
         { status: 400 }
       );
     }
 
-    if (!process.env.MP_ACCESS_TOKEN) {
+    const mpAccessToken = process.env.MP_ACCESS_TOKEN;
+    const appUrl = process.env.APP_URL;
+
+    if (!mpAccessToken) {
       return NextResponse.json(
         { error: "Falta MP_ACCESS_TOKEN en variables de entorno" },
         { status: 500 }
       );
     }
 
-    if (!process.env.APP_URL) {
+    if (!appUrl) {
       return NextResponse.json(
         { error: "Falta APP_URL en variables de entorno" },
         { status: 500 }
       );
     }
 
+    // Buscar la reserva real en base de datos
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: {
+        id: true,
+        code: true,
+        totalAmount: true,
+        depositAmount: true,
+        isDepositPaid: true,
+        status: true,
+        customer: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      return NextResponse.json(
+        { error: "Reserva no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    // Si ya está pagado el abono, evita duplicar
+    if (booking.isDepositPaid) {
+      return NextResponse.json(
+        { error: "La reserva ya tiene el abono pagado" },
+        { status: 409 }
+      );
+    }
+
+    const amount = Number(booking.depositAmount);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return NextResponse.json(
+        { error: "Monto inválido para la reserva" },
+        { status: 400 }
+      );
+    }
+
     const preferencePayload = {
       items: [
         {
-          title: "Reserva Reverencia Majestad",
+          id: booking.id,
+          title: `Reserva Reverencia Majestad ${booking.code}`,
           description: "Abono de reserva",
           quantity: 1,
           currency_id: "CLP",
-          unit_price: Number(amount),
+          unit_price: amount,
         },
       ],
 
-      payer: {
-        name: "Cliente Reverencia",
-        email: "test_user_123456@testuser.com",
-      },
+      payer: booking.customer?.email
+        ? {
+            name: booking.customer.name ?? "Cliente Reverencia",
+            email: booking.customer.email,
+          }
+        : undefined,
 
-      external_reference: String(bookingId),
+      external_reference: booking.id,
 
       metadata: {
-        booking_id: String(bookingId),
+        booking_id: booking.id,
+        booking_code: booking.code,
         source: "reverencia-majestad",
+        payment_type: "deposit",
       },
 
       back_urls: {
-        success: `${process.env.APP_URL}/checkout/success`,
-        failure: `${process.env.APP_URL}/checkout/failure`,
-        pending: `${process.env.APP_URL}/checkout/pending`,
+        success: `${appUrl}/checkout/success?bookingId=${booking.id}`,
+        failure: `${appUrl}/checkout/failure?bookingId=${booking.id}`,
+        pending: `${appUrl}/checkout/pending?bookingId=${booking.id}`,
       },
 
       auto_return: "approved",
-      notification_url: `${process.env.APP_URL}/api/webhooks/mercadopago`,
+      notification_url: `${appUrl}/api/webhooks/mercadopago`,
     };
 
     const response = await fetch(
@@ -65,9 +121,10 @@ export async function POST(req: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${mpAccessToken}`,
         },
         body: JSON.stringify(preferencePayload),
+        cache: "no-store",
       }
     );
 
@@ -76,7 +133,10 @@ export async function POST(req: Request) {
     if (!response.ok) {
       console.error("Mercado Pago error:", data);
       return NextResponse.json(
-        { error: "Error creando preferencia", detail: data },
+        {
+          error: "Error creando preferencia",
+          detail: data,
+        },
         { status: response.status || 500 }
       );
     }
@@ -85,11 +145,14 @@ export async function POST(req: Request) {
       id: data.id,
       init_point: data.init_point,
       sandbox_init_point: data.sandbox_init_point ?? null,
+      bookingId: booking.id,
+      bookingCode: booking.code,
+      amount,
     });
   } catch (error) {
-    console.error("Error creando pago:", error);
+    console.error("Error creando preferencia:", error);
     return NextResponse.json(
-      { error: "Error creando pago" },
+      { error: "Error interno creando preferencia" },
       { status: 500 }
     );
   }
