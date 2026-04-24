@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { FloatingWhatsApp } from "@/components/layout/floating-whatsapp";
 
-const serif = Cormorant_Garamond({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500"],
   variable: "--font-serif",
+  display: "swap",
 });
 
-const sans = Manrope({
+const jost = Jost({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500", "600"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -25,8 +27,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${serif.variable} ${sans.variable}`}>
-      <body className="min-h-screen bg-white text-stone-900 antialiased">
+    <html lang="es" className={`${cormorant.variable} ${jost.variable}`}>
+      <body className="font-sans min-h-screen bg-white text-stone-900 antialiased">
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />
