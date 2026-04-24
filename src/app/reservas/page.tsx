@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { BookingForm } from "@/components/forms/booking-form";
+import { BookingWizard } from "@/components/booking/BookingWizard";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +36,7 @@ export default async function ReservasPage() {
         </p>
       </div>
 
-      <BookingForm services={services} />
+      <BookingWizard services={services.map((service) => ({ id: service.id, name: service.name }))} />
     </main>
   );
 }

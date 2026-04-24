@@ -49,6 +49,18 @@ async function main() {
     },
   });
 
+  const colorist = await prisma.user.upsert({
+    where: { email: "colorist@reverenciamajestad.cl" },
+    update: {},
+    create: {
+      email: "colorist@reverenciamajestad.cl",
+      passwordHash: await hashPassword("Colorist2026!"),
+      name: "Valentina Saavedra",
+      phone: "+56944444444",
+      role: Role.PROFESSIONAL,
+    },
+  });
+
   const stylistProfile = await prisma.professionalProfile.upsert({
     where: { userId: stylist.id },
     update: {},
@@ -73,6 +85,18 @@ async function main() {
     },
   });
 
+  const coloristProfile = await prisma.professionalProfile.upsert({
+    where: { userId: colorist.id },
+    update: {},
+    create: {
+      userId: colorist.id,
+      kind: ProfessionalKind.STYLIST,
+      bio: "Colorista editorial con foco en balayage, gloss y corrección de tono.",
+      specialties: ["Balayage", "Color Correctivo", "Gloss", "Hair Spa"],
+      commissionRate: 0.36,
+    },
+  });
+
   const beautyServices = await prisma.service.findMany({
     where: { category: { in: ["BEAUTY", "SKINCARE"] } },
   });
@@ -91,6 +115,22 @@ async function main() {
       update: {},
       create: {
         professionalId: stylistProfile.id,
+        serviceId: service.id,
+      },
+    });
+  }
+
+  for (const service of beautyServices) {
+    await prisma.professionalService.upsert({
+      where: {
+        professionalId_serviceId: {
+          professionalId: coloristProfile.id,
+          serviceId: service.id,
+        },
+      },
+      update: {},
+      create: {
+        professionalId: coloristProfile.id,
         serviceId: service.id,
       },
     });
