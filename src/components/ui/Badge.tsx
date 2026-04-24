@@ -3,7 +3,7 @@
 import { forwardRef, HTMLAttributes } from 'react';
 import clsx from 'clsx';
 
-type BadgeStatus = 'pending' | 'confirmed' | 'done' | 'cancelled' | 'vip' | 'live';
+export type BadgeStatus = 'pending' | 'confirmed' | 'done' | 'cancelled' | 'vip' | 'live';
 type BadgeSize = 'sm' | 'md';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

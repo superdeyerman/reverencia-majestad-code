@@ -1,0 +1,478 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Reverencia Majestad – Dashboard constants & mock data
+   Replace MOCK_* arrays with real API calls in useDashboardData.ts
+   when connecting to /api/dashboard, /api/bookings, /api/customers
+───────────────────────────────────────────────────────────────────────────── */
+
+import type {
+  BookingStatus,
+  BookingModality,
+  DashboardBooking,
+  DashboardClient,
+  DashboardService,
+  FilterState,
+  PaginationState,
+  DashboardPreferences,
+} from './types';
+
+// ── Status display config ─────────────────────────────────────────────────────
+
+export const STATUS_CONFIG: Record<
+  BookingStatus,
+  { label: string; color: string; bg: string; dot: string }
+> = {
+  PENDING:         { label: 'Pendiente',      color: 'text-orange',           bg: 'bg-orange/10',                dot: 'bg-orange' },
+  PAYMENT_PENDING: { label: 'Pago Pendiente', color: 'text-gold-dark',        bg: 'bg-gold/10',                  dot: 'bg-gold' },
+  CONFIRMED:       { label: 'Confirmada',     color: 'text-status-confirmed', bg: 'bg-status-confirmed/10',      dot: 'bg-status-confirmed' },
+  IN_PROGRESS:     { label: 'En Servicio',    color: 'text-blue',             bg: 'bg-blue/10',                  dot: 'bg-blue' },
+  COMPLETED:       { label: 'Completada',     color: 'text-green',            bg: 'bg-green/10',                 dot: 'bg-green' },
+  CANCELLED:       { label: 'Cancelada',      color: 'text-red',              bg: 'bg-red/10',                   dot: 'bg-red' },
+  PAYMENT_FAILED:  { label: 'Pago Fallido',   color: 'text-red',              bg: 'bg-rose/10',                  dot: 'bg-rose' },
+};
+
+// ── Modality display config ───────────────────────────────────────────────────
+
+export const MODALITY_CONFIG: Record<BookingModality, { label: string; emoji: string }> = {
+  HOME:           { label: 'Domicilio',       emoji: '🏠' },
+  HOTEL:          { label: 'Hotel',           emoji: '🏨' },
+  PRIVATE_STUDIO: { label: 'Salón Privado',  emoji: '✂️' },
+};
+
+// ── Page size options ─────────────────────────────────────────────────────────
+
+export const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
+
+// ── Defaults ──────────────────────────────────────────────────────────────────
+
+export const DEFAULT_FILTERS: FilterState = {
+  search: '',
+  status: 'ALL',
+  modality: 'ALL',
+  service: '',
+  dateFrom: '',
+  dateTo: '',
+  amountMin: '',
+  amountMax: '',
+};
+
+export const DEFAULT_PAGINATION: PaginationState = { page: 1, pageSize: 25 };
+
+export const DEFAULT_PREFERENCES: DashboardPreferences = {
+  activeTab: 'overview',
+  pageSize: 25,
+  filtersCollapsed: false,
+  auditLogExpanded: false,
+  dateRange: '7d',
+};
+
+// ── Service catalogue ─────────────────────────────────────────────────────────
+
+export const MOCK_SERVICES: DashboardService[] = [
+  { id: 'svc-1',  name: 'Corte & Styling',             category: 'BEAUTY',   basePrice: 28_000,  durationMinutes: 60,  bookingCount: 42,  revenue: 1_176_000 },
+  { id: 'svc-2',  name: 'Colorimetría Premium',         category: 'BEAUTY',   basePrice: 65_000,  durationMinutes: 120, bookingCount: 38,  revenue: 2_470_000 },
+  { id: 'svc-3',  name: 'Balayage + Corte',             category: 'BEAUTY',   basePrice: 85_000,  durationMinutes: 180, bookingCount: 29,  revenue: 2_465_000 },
+  { id: 'svc-4',  name: 'Extensiones Premium',          category: 'BEAUTY',   basePrice: 120_000, durationMinutes: 240, bookingCount: 18,  revenue: 2_160_000 },
+  { id: 'svc-5',  name: 'Peinado de Novia',             category: 'BEAUTY',   basePrice: 95_000,  durationMinutes: 120, bookingCount: 14,  revenue: 1_330_000 },
+  { id: 'svc-6',  name: 'Colorimetría + Mechas',        category: 'BEAUTY',   basePrice: 72_000,  durationMinutes: 150, bookingCount: 22,  revenue: 1_584_000 },
+  { id: 'svc-7',  name: 'Corte Masculino + Barba',      category: 'BEAUTY',   basePrice: 26_000,  durationMinutes: 45,  bookingCount: 31,  revenue: 806_000   },
+  { id: 'svc-8',  name: 'Manicure Spa',                 category: 'BEAUTY',   basePrice: 22_000,  durationMinutes: 45,  bookingCount: 47,  revenue: 1_034_000 },
+  { id: 'svc-9',  name: 'Masaje Relajante 60 min',      category: 'WELLNESS', basePrice: 38_000,  durationMinutes: 60,  bookingCount: 54,  revenue: 2_052_000 },
+  { id: 'svc-10', name: 'Masaje Relajante 90 min',      category: 'WELLNESS', basePrice: 48_000,  durationMinutes: 90,  bookingCount: 49,  revenue: 2_352_000 },
+  { id: 'svc-11', name: 'Masaje Tejido Profundo',       category: 'WELLNESS', basePrice: 55_000,  durationMinutes: 90,  bookingCount: 33,  revenue: 1_815_000 },
+  { id: 'svc-12', name: 'Aromaterapia + Masaje',        category: 'WELLNESS', basePrice: 44_000,  durationMinutes: 75,  bookingCount: 41,  revenue: 1_804_000 },
+  { id: 'svc-13', name: 'Tratamiento Facial Express',   category: 'SKINCARE', basePrice: 42_000,  durationMinutes: 60,  bookingCount: 36,  revenue: 1_512_000 },
+  { id: 'svc-14', name: 'Peeling Facial + Hidratación', category: 'SKINCARE', basePrice: 58_000,  durationMinutes: 90,  bookingCount: 27,  revenue: 1_566_000 },
+  { id: 'svc-15', name: 'Facial Premium 90 min',        category: 'SKINCARE', basePrice: 62_000,  durationMinutes: 90,  bookingCount: 24,  revenue: 1_488_000 },
+  { id: 'svc-16', name: 'Dermapen',                     category: 'SKINCARE', basePrice: 75_000,  durationMinutes: 60,  bookingCount: 19,  revenue: 1_425_000 },
+];
+
+// ── 30 mock bookings ──────────────────────────────────────────────────────────
+// Sorted descending by appointmentAt (most recent first)
+// Replace with: const res = await fetch('/api/bookings'); const { data } = await res.json();
+
+export const MOCK_BOOKINGS: DashboardBooking[] = [
+  /* ── Future – confirmed + pending ──────────────────────────────────────── */
+  {
+    id: 'bk-127', code: 'RM-127', status: 'CONFIRMED', modality: 'HOTEL',
+    appointmentAt: '2026-05-03T10:00:00',
+    clientName: 'Isabel Fuentes', clientEmail: 'ifuentes@corp.cl', clientPhone: '+56928345678',
+    serviceName: 'Extensiones Premium', serviceCategory: 'BEAUTY',
+    professionalName: 'Sofía Reyes',
+    hotelName: 'Mandarin Oriental', roomNumber: '504',
+    totalAmount: 120_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-20T14:30:00',
+  },
+  {
+    id: 'bk-126', code: 'RM-126', status: 'CONFIRMED', modality: 'HOTEL',
+    appointmentAt: '2026-05-02T14:00:00',
+    clientName: 'Valentina Guzmán', clientEmail: 'vguzman@hotmail.com', clientPhone: '+56992345678',
+    serviceName: 'Balayage + Corte', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    hotelName: 'Hotel W Santiago', roomNumber: '1204',
+    totalAmount: 85_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-19T11:00:00',
+  },
+  {
+    id: 'bk-125', code: 'RM-125', status: 'PENDING', modality: 'HOTEL',
+    appointmentAt: '2026-05-01T10:00:00',
+    clientName: 'Beatriz Acevedo', clientEmail: 'bacevedo@mail.cl', clientPhone: '+56912340987',
+    serviceName: 'Colorimetría + Mechas', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    hotelName: 'NH Collection Santiago', roomNumber: '312',
+    totalAmount: 72_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CREATED',
+    createdAt: '2026-04-22T09:15:00',
+  },
+  {
+    id: 'bk-124', code: 'RM-124', status: 'CONFIRMED', modality: 'HOME',
+    appointmentAt: '2026-04-30T15:30:00',
+    clientName: 'Daniela Herrera', clientEmail: 'dherrera@hotmail.com', clientPhone: '+56932109876',
+    serviceName: 'Facial Premium 90 min', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    district: 'Ñuñoa', address: 'Irarrázaval 1450',
+    totalAmount: 62_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-21T16:00:00',
+  },
+  {
+    id: 'bk-123', code: 'RM-123', status: 'PAYMENT_PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-30T09:00:00',
+    clientName: 'Lorena Campos', clientEmail: 'lcampos@gmail.com', clientPhone: '+56965901234',
+    serviceName: 'Aromaterapia + Masaje', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'La Florida', address: 'Vicuña Mackenna 5421',
+    totalAmount: 44_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'PENDING',
+    createdAt: '2026-04-22T11:30:00',
+  },
+  {
+    id: 'bk-122', code: 'RM-122', status: 'PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-29T11:00:00',
+    clientName: 'Marisol Torres', clientEmail: 'mtorres@live.cl', clientPhone: '+56956781234',
+    serviceName: 'Corte & Styling', serviceCategory: 'BEAUTY',
+    professionalName: 'Carlos Herrera',
+    district: 'Maipú', address: 'Los Quillayes 231',
+    totalAmount: 28_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CREATED',
+    createdAt: '2026-04-23T10:00:00',
+  },
+  {
+    id: 'bk-121', code: 'RM-121', status: 'CONFIRMED', modality: 'HOTEL',
+    appointmentAt: '2026-04-29T10:00:00',
+    clientName: 'Alejandra Ibáñez', clientEmail: 'aibañez@corp.cl', clientPhone: '+56978905678',
+    serviceName: 'Dermapen', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    hotelName: 'Grand Hyatt Santiago', roomNumber: '820',
+    totalAmount: 75_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-20T13:00:00',
+  },
+  {
+    id: 'bk-120', code: 'RM-120', status: 'PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-28T16:00:00',
+    clientName: 'Verónica Medina', clientEmail: 'vmedina@yahoo.com', clientPhone: '+56945601234',
+    serviceName: 'Masaje Relajante 90 min', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Puente Alto', address: 'Camino El Volcán 9876',
+    totalAmount: 48_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CREATED',
+    createdAt: '2026-04-23T15:30:00',
+  },
+  {
+    id: 'bk-119', code: 'RM-119', status: 'PAYMENT_PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-28T12:00:00',
+    clientName: 'Paloma Díaz', clientEmail: 'paloma.d@icloud.com', clientPhone: '+56978901234',
+    serviceName: 'Peeling Facial + Hidratación', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    district: 'Lo Barnechea', address: 'Camino El Olivar 3200',
+    totalAmount: 58_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'PENDING', isVIP: true,
+    notes: 'Piel sensible. Solo productos orgánicos certificados.',
+    createdAt: '2026-04-22T14:00:00',
+  },
+  {
+    id: 'bk-118', code: 'RM-118', status: 'CONFIRMED', modality: 'HOTEL',
+    appointmentAt: '2026-04-27T07:00:00',
+    clientName: 'Francisca Vega', clientEmail: 'fvega@empresa.cl', clientPhone: '+56934567890',
+    serviceName: 'Peinado de Novia', serviceCategory: 'BEAUTY',
+    professionalName: 'Sofía Reyes',
+    hotelName: 'Hotel Intercontinental', roomNumber: 'Salón B',
+    totalAmount: 95_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    notes: 'Día de matrimonio. Llegada 30 min antes para prueba final.',
+    createdAt: '2026-03-28T10:00:00',
+  },
+  {
+    id: 'bk-117', code: 'RM-117', status: 'PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-26T15:00:00',
+    clientName: 'Elena Morales', clientEmail: 'emorales@gmail.com', clientPhone: '+56923450987',
+    serviceName: 'Masaje Relajante 60 min', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Recoleta', address: 'Loreto 1820',
+    totalAmount: 38_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CREATED',
+    createdAt: '2026-04-23T17:00:00',
+  },
+  {
+    id: 'bk-116', code: 'RM-116', status: 'CONFIRMED', modality: 'HOME',
+    appointmentAt: '2026-04-26T10:00:00',
+    clientName: 'Javiera Muñoz', clientEmail: 'jmunoz@live.cl', clientPhone: '+56956789012',
+    serviceName: 'Extensiones Premium', serviceCategory: 'BEAUTY',
+    professionalName: 'Sofía Reyes',
+    district: 'Las Condes', address: 'Apoquindo 5500',
+    totalAmount: 120_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-18T09:00:00',
+  },
+  {
+    id: 'bk-115', code: 'RM-115', status: 'PAYMENT_PENDING', modality: 'HOME',
+    appointmentAt: '2026-04-25T14:30:00',
+    clientName: 'Ana Valdés', clientEmail: 'ana.v@gmail.com', clientPhone: '+56943210987',
+    serviceName: 'Masaje Relajante 90 min', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Vitacura', address: 'Alonso de Córdova 3400',
+    totalAmount: 48_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'PENDING',
+    createdAt: '2026-04-22T16:00:00',
+  },
+  {
+    id: 'bk-114', code: 'RM-114', status: 'CONFIRMED', modality: 'HOME',
+    appointmentAt: '2026-04-25T10:00:00',
+    clientName: 'María José Fernández', clientEmail: 'mj.fernandez@email.cl', clientPhone: '+56987123456',
+    serviceName: 'Colorimetría Premium', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    district: 'Las Condes', address: 'El Golf 40',
+    totalAmount: 65_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    notes: 'Solicita productos sin amoníaco. Alergia a tintes convencionales.',
+    createdAt: '2026-04-20T10:00:00',
+  },
+
+  /* ── Today (2026-04-24) ─────────────────────────────────────────────────── */
+  {
+    id: 'bk-113', code: 'RM-113', status: 'CONFIRMED', modality: 'HOME',
+    appointmentAt: '2026-04-24T13:00:00',
+    clientName: 'Catalina Ramos', clientEmail: 'cramos@email.cl', clientPhone: '+56923456789',
+    serviceName: 'Corte Masculino + Barba', serviceCategory: 'BEAUTY',
+    professionalName: 'Carlos Herrera',
+    district: 'Providencia', address: 'Manuel Montt 1050',
+    totalAmount: 26_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-21T11:00:00',
+  },
+  {
+    id: 'bk-112', code: 'RM-112', status: 'IN_PROGRESS', modality: 'HOTEL',
+    appointmentAt: '2026-04-24T10:00:00',
+    clientName: 'Cristina Navarro', clientEmail: 'cnavarro@empresa.cl', clientPhone: '+56978901234',
+    serviceName: 'Facial Premium 90 min', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    hotelName: 'Sheraton Santiago', roomNumber: '715',
+    totalAmount: 62_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-18T15:00:00',
+  },
+  {
+    id: 'bk-111', code: 'RM-111', status: 'IN_PROGRESS', modality: 'HOME',
+    appointmentAt: '2026-04-24T09:00:00',
+    clientName: 'Patricia Jiménez', clientEmail: 'pjimenez@gmail.com', clientPhone: '+56945678901',
+    serviceName: 'Colorimetría Premium', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    district: 'Vitacura', address: 'Nueva Costanera 3698',
+    totalAmount: 65_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-19T12:00:00',
+  },
+  {
+    id: 'bk-110', code: 'RM-110', status: 'CONFIRMED', modality: 'HOME',
+    appointmentAt: '2026-04-24T11:00:00',
+    clientName: 'Sofía Contreras', clientEmail: 'sofia.c@mail.com', clientPhone: '+56967890123',
+    serviceName: 'Corte & Styling', serviceCategory: 'BEAUTY',
+    professionalName: 'Carlos Herrera',
+    district: 'Providencia', address: 'Suecia 0155',
+    totalAmount: 28_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 5_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-21T10:00:00',
+  },
+
+  /* ── Past – completed ───────────────────────────────────────────────────── */
+  {
+    id: 'bk-109', code: 'RM-109', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-23T11:00:00',
+    clientName: 'Carolina Reyes', clientEmail: 'creyes@email.cl', clientPhone: '+56978012345',
+    serviceName: 'Masaje Relajante 90 min', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Santiago Centro', address: 'Monjitas 564',
+    totalAmount: 48_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 48_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-18T10:00:00',
+  },
+  {
+    id: 'bk-108', code: 'RM-108', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-22T16:00:00',
+    clientName: 'Camila Ortiz', clientEmail: 'c.ortiz@empresa.cl', clientPhone: '+56989012345',
+    serviceName: 'Manicure Spa', serviceCategory: 'BEAUTY',
+    professionalName: 'Sofía Reyes',
+    district: 'Santiago Centro', address: 'Agustinas 970',
+    totalAmount: 22_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 22_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-17T11:00:00',
+  },
+  {
+    id: 'bk-107', code: 'RM-107', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-21T09:30:00',
+    clientName: 'Renata Castro', clientEmail: 'renata.c@yahoo.com', clientPhone: '+56912345678',
+    serviceName: 'Corte & Styling', serviceCategory: 'BEAUTY',
+    professionalName: 'Carlos Herrera',
+    district: 'Maipú', address: 'Los Quillayes 231',
+    totalAmount: 28_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 28_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-16T10:00:00',
+  },
+  {
+    id: 'bk-106', code: 'RM-106', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-20T14:00:00',
+    clientName: 'Martina López', clientEmail: 'mlopez@email.com', clientPhone: '+56976543210',
+    serviceName: 'Aromaterapia + Masaje', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Providencia', address: 'Pedro de Valdivia 1552',
+    totalAmount: 44_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 44_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-15T14:00:00',
+  },
+  {
+    id: 'bk-105', code: 'RM-105', status: 'COMPLETED', modality: 'HOTEL',
+    appointmentAt: '2026-04-20T09:00:00',
+    clientName: 'Gabriela Moreno', clientEmail: 'gmoreno@corp.cl', clientPhone: '+56965432109',
+    serviceName: 'Tratamiento Facial Express', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    hotelName: 'Hotel W Santiago', roomNumber: '1204',
+    totalAmount: 42_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 42_000,
+    paymentStatus: 'APPROVED',
+    createdAt: '2026-04-15T09:00:00',
+  },
+  {
+    id: 'bk-104', code: 'RM-104', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-19T15:00:00',
+    clientName: 'Valeria Soto', clientEmail: 'vsoto@corp.cl', clientPhone: '+56945678901',
+    serviceName: 'Aromaterapia + Masaje', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    district: 'Las Condes', address: 'Av. Las Condes 11820',
+    totalAmount: 44_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 44_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-14T12:00:00',
+  },
+  {
+    id: 'bk-103', code: 'RM-103', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-19T09:30:00',
+    clientName: 'Paloma Díaz', clientEmail: 'paloma.d@icloud.com', clientPhone: '+56978901234',
+    serviceName: 'Peeling Facial + Hidratación', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    district: 'Lo Barnechea', address: 'Camino El Olivar 3200',
+    totalAmount: 58_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 58_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-14T11:00:00',
+  },
+  {
+    id: 'bk-102', code: 'RM-102', status: 'COMPLETED', modality: 'HOTEL',
+    appointmentAt: '2026-04-18T14:00:00',
+    clientName: 'Valentina Guzmán', clientEmail: 'vguzman@hotmail.com', clientPhone: '+56992345678',
+    serviceName: 'Balayage + Corte', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    hotelName: 'Grand Hyatt Santiago', roomNumber: '940',
+    totalAmount: 85_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 85_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-13T10:00:00',
+  },
+  {
+    id: 'bk-101', code: 'RM-101', status: 'COMPLETED', modality: 'HOME',
+    appointmentAt: '2026-04-18T10:00:00',
+    clientName: 'María José Fernández', clientEmail: 'mj.fernandez@email.cl', clientPhone: '+56987123456',
+    serviceName: 'Colorimetría Premium', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    district: 'Las Condes', address: 'El Golf 40',
+    totalAmount: 65_000, depositAmount: 5_000, isDepositPaid: true, paidAmountTotal: 65_000,
+    paymentStatus: 'APPROVED', isVIP: true,
+    createdAt: '2026-04-13T09:00:00',
+  },
+
+  /* ── Past – cancelled ───────────────────────────────────────────────────── */
+  {
+    id: 'bk-128', code: 'RM-128', status: 'CANCELLED', modality: 'HOME',
+    appointmentAt: '2026-04-19T11:30:00',
+    clientName: 'Antonia Pérez', clientEmail: 'antonia.p@gmail.com', clientPhone: '+56954321098',
+    serviceName: 'Colorimetría + Mechas', serviceCategory: 'BEAUTY',
+    professionalName: 'Catalina Martínez',
+    district: 'Vitacura', address: 'Alonso de Córdova 1234',
+    totalAmount: 72_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CANCELLED',
+    notes: 'Cancelado con 2 días de anticipación.',
+    createdAt: '2026-04-15T10:00:00',
+  },
+  {
+    id: 'bk-108b', code: 'RM-108B', status: 'CANCELLED', modality: 'HOTEL',
+    appointmentAt: '2026-04-22T10:30:00',
+    clientName: 'Isidora Rojas', clientEmail: 'irojas@personal.cl', clientPhone: '+56921098765',
+    serviceName: 'Masaje Tejido Profundo', serviceCategory: 'WELLNESS',
+    professionalName: 'Valentina Lagos',
+    hotelName: 'Marriott Santiago', roomNumber: '812',
+    totalAmount: 55_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'CANCELLED',
+    notes: 'Cancelado por viaje de emergencia.',
+    createdAt: '2026-04-17T09:00:00',
+  },
+
+  /* ── Past – payment failed ──────────────────────────────────────────────── */
+  {
+    id: 'bk-129', code: 'RM-129', status: 'PAYMENT_FAILED', modality: 'HOME',
+    appointmentAt: '2026-04-21T14:00:00',
+    clientName: 'Paula Espinoza', clientEmail: 'pespinoza@email.cl', clientPhone: '+56976789012',
+    serviceName: 'Dermapen', serviceCategory: 'SKINCARE',
+    professionalName: 'Andrea Rojas',
+    district: 'Ñuñoa', address: 'Irarrázaval 2456',
+    totalAmount: 75_000, depositAmount: 5_000, isDepositPaid: false, paidAmountTotal: 0,
+    paymentStatus: 'FAILED',
+    notes: 'Tarjeta rechazada. Contactar para reintentar.',
+    createdAt: '2026-04-18T13:00:00',
+  },
+];
+
+// ── 30 mock clients ───────────────────────────────────────────────────────────
+
+export const MOCK_CLIENTS: DashboardClient[] = [
+  { id: 'cli-001', name: 'María José Fernández',  email: 'mj.fernandez@email.cl',  phone: '+56 9 8712 3456', totalSpent: 1_340_000, visitCount: 24, lastVisitAt: '2026-04-18', loyaltyTier: 'gold',     preferences: ['Colorimetría', 'Sin amoníaco'],        notes: 'Alérgica a tintes convencionales.',    createdAt: '2024-08-15' },
+  { id: 'cli-002', name: 'Valentina Guzmán',       email: 'vguzman@hotmail.com',     phone: '+56 9 9234 5678', totalSpent: 2_780_000, visitCount: 38, lastVisitAt: '2026-04-18', loyaltyTier: 'platinum', preferences: ['Balayage', 'Premium', 'Hotel'],                                               createdAt: '2023-11-20' },
+  { id: 'cli-003', name: 'Gabriela Moreno',        email: 'gmoreno@corp.cl',         phone: '+56 9 6543 2109', totalSpent: 840_000,   visitCount: 15, lastVisitAt: '2026-04-20', loyaltyTier: 'silver',   preferences: ['Facial', 'Hotel', 'Mañana'],                                                  createdAt: '2025-01-10' },
+  { id: 'cli-004', name: 'Paloma Díaz',            email: 'paloma.d@icloud.com',     phone: '+56 9 7890 1234', totalSpent: 1_650_000, visitCount: 29, lastVisitAt: '2026-04-19', loyaltyTier: 'gold',     preferences: ['Peeling', 'Hidratación', 'Orgánico'], notes: 'Piel sensible.',               createdAt: '2024-05-22' },
+  { id: 'cli-005', name: 'Javiera Muñoz',          email: 'jmunoz@live.cl',          phone: '+56 9 5678 9012', totalSpent: 3_200_000, visitCount: 45, lastVisitAt: '2026-04-26', loyaltyTier: 'platinum', preferences: ['Extensiones', 'Premium', 'Sofía Reyes'],                                      createdAt: '2023-09-05' },
+  { id: 'cli-006', name: 'Ana Valdés',             email: 'ana.v@gmail.com',         phone: '+56 9 4321 0987', totalSpent: 320_000,   visitCount: 7,  lastVisitAt: '2026-04-05', loyaltyTier: 'bronze',   preferences: ['Masajes', 'Relajante'],                                                       createdAt: '2025-09-14' },
+  { id: 'cli-007', name: 'Francisca Vega',         email: 'fvega@empresa.cl',        phone: '+56 9 3456 7890', totalSpent: 1_890_000, visitCount: 32, lastVisitAt: '2026-03-28', loyaltyTier: 'gold',     preferences: ['Novias', 'Eventos', 'Hotel'],         notes: 'Matrimonio mayo 2026.',        createdAt: '2023-07-18' },
+  { id: 'cli-008', name: 'Isidora Rojas',          email: 'irojas@personal.cl',      phone: '+56 9 2109 8765', totalSpent: 540_000,   visitCount: 11, lastVisitAt: '2026-04-01', loyaltyTier: 'silver',   preferences: ['Masaje Profundo', 'Hotel'],                                                    createdAt: '2025-02-28' },
+  { id: 'cli-009', name: 'Renata Castro',          email: 'renata.c@yahoo.com',      phone: '+56 9 1234 5678', totalSpent: 210_000,   visitCount: 6,  lastVisitAt: '2026-04-21', loyaltyTier: 'bronze',   preferences: ['Corte', 'Styling', 'Maipú'],                                                  createdAt: '2025-10-01' },
+  { id: 'cli-010', name: 'Camila Ortiz',           email: 'c.ortiz@empresa.cl',      phone: '+56 9 8901 2345', totalSpent: 480_000,   visitCount: 19, lastVisitAt: '2026-03-15', loyaltyTier: 'bronze',   preferences: ['Manicure', 'Spa', 'Centro'],                                                  createdAt: '2024-11-07' },
+  { id: 'cli-011', name: 'Martina López',          email: 'mlopez@email.com',        phone: '+56 9 7654 3210', totalSpent: 760_000,   visitCount: 14, lastVisitAt: '2026-04-20', loyaltyTier: 'silver',   preferences: ['Aromaterapia', 'Masaje', 'Relajación'],                                       createdAt: '2024-12-03' },
+  { id: 'cli-012', name: 'Sofía Contreras',        email: 'sofia.c@mail.com',        phone: '+56 9 6789 0123', totalSpent: 150_000,   visitCount: 4,  lastVisitAt: '2026-03-10', loyaltyTier: 'bronze',   preferences: ['Corte', 'Providencia'],                                                       createdAt: '2026-01-15' },
+  { id: 'cli-013', name: 'Antonia Pérez',          email: 'antonia.p@gmail.com',     phone: '+56 9 5432 1098', totalSpent: 920_000,   visitCount: 17, lastVisitAt: '2026-03-25', loyaltyTier: 'silver',   preferences: ['Colorimetría', 'Mechas', 'Vitacura'], notes: 'Dar seguimiento.',             createdAt: '2024-08-22' },
+  { id: 'cli-014', name: 'Valeria Soto',           email: 'vsoto@corp.cl',           phone: '+56 9 4567 8901', totalSpent: 1_120_000, visitCount: 22, lastVisitAt: '2026-04-19', loyaltyTier: 'gold',     preferences: ['Masaje', 'Aromaterapia', 'Premium'],                                          createdAt: '2024-06-10' },
+  { id: 'cli-015', name: 'Daniela Herrera',        email: 'dherrera@hotmail.com',    phone: '+56 9 3210 9876', totalSpent: 390_000,   visitCount: 8,  lastVisitAt: '2026-03-05', loyaltyTier: 'bronze',   preferences: ['Facial', 'Ñuñoa'],                                                            createdAt: '2025-07-19' },
+  { id: 'cli-016', name: 'Catalina Ramos',         email: 'cramos@email.cl',         phone: '+56 9 2345 6789', totalSpent: 280_000,   visitCount: 10, lastVisitAt: '2026-04-24', loyaltyTier: 'bronze',   preferences: ['Corte Masculino', 'Barba', 'Providencia'],                                    createdAt: '2025-08-30' },
+  { id: 'cli-017', name: 'Paula Espinoza',         email: 'pespinoza@email.cl',      phone: '+56 9 7678 9012', totalSpent: 680_000,   visitCount: 13, lastVisitAt: '2026-04-21', loyaltyTier: 'silver',   preferences: ['Dermapen', 'Skincare', 'Ñuñoa'],                                              createdAt: '2024-10-12' },
+  { id: 'cli-018', name: 'Cristina Navarro',       email: 'cnavarro@empresa.cl',     phone: '+56 9 7890 1234', totalSpent: 1_050_000, visitCount: 21, lastVisitAt: '2026-04-24', loyaltyTier: 'gold',     preferences: ['Facial', 'Hotel Premium'],                                                    createdAt: '2024-04-17' },
+  { id: 'cli-019', name: 'Beatriz Acevedo',        email: 'bacevedo@mail.cl',        phone: '+56 9 1234 0987', totalSpent: 2_600_000, visitCount: 35, lastVisitAt: '2026-04-15', loyaltyTier: 'platinum', preferences: ['Colorimetría', 'Mechas', 'Hoteles'],                                          createdAt: '2023-06-01' },
+  { id: 'cli-020', name: 'Elena Morales',          email: 'emorales@gmail.com',      phone: '+56 9 2345 0987', totalSpent: 120_000,   visitCount: 3,  lastVisitAt: '2026-04-15', loyaltyTier: 'bronze',   preferences: ['Masaje', 'Relajante'],                                                        createdAt: '2026-03-10' },
+  { id: 'cli-021', name: 'Lorena Campos',          email: 'lcampos@gmail.com',       phone: '+56 9 6590 1234', totalSpent: 590_000,   visitCount: 11, lastVisitAt: '2026-04-08', loyaltyTier: 'silver',   preferences: ['Aromaterapia', 'La Florida'],                                                 createdAt: '2025-04-20' },
+  { id: 'cli-022', name: 'Patricia Jiménez',       email: 'pjimenez@gmail.com',      phone: '+56 9 4567 8901', totalSpent: 1_340_000, visitCount: 26, lastVisitAt: '2026-04-24', loyaltyTier: 'gold',     preferences: ['Colorimetría', 'Vitacura', 'Mañana'], isVIP: true,                           createdAt: '2024-01-08' } as DashboardClient & { isVIP?: boolean },
+  { id: 'cli-023', name: 'Marisol Torres',         email: 'mtorres@live.cl',         phone: '+56 9 5678 1234', totalSpent: 240_000,   visitCount: 9,  lastVisitAt: '2026-04-05', loyaltyTier: 'bronze',   preferences: ['Corte', 'Maipú'],                                                             createdAt: '2025-11-25' },
+  { id: 'cli-024', name: 'Carolina Reyes',         email: 'creyes@email.cl',         phone: '+56 9 7801 2345', totalSpent: 780_000,   visitCount: 15, lastVisitAt: '2026-04-23', loyaltyTier: 'silver',   preferences: ['Masaje', 'Centro'],                                                           createdAt: '2024-09-03' },
+  { id: 'cli-025', name: 'Isabel Fuentes',         email: 'ifuentes@corp.cl',        phone: '+56 9 2834 5678', totalSpent: 1_680_000, visitCount: 28, lastVisitAt: '2026-04-20', loyaltyTier: 'gold',     preferences: ['Extensiones', 'Hotel', 'Premium'],                                            createdAt: '2023-12-01' },
+  { id: 'cli-026', name: 'Natalia Vargas',         email: 'nvargas@yahoo.cl',        phone: '+56 9 3309 0123', totalSpent: 330_000,   visitCount: 8,  lastVisitAt: '2026-03-28', loyaltyTier: 'bronze',   preferences: ['Facial', 'Express'],                                                          createdAt: '2025-06-14' },
+  { id: 'cli-027', name: 'Alejandra Ibáñez',       email: 'aibañez@corp.cl',         phone: '+56 9 7890 5678', totalSpent: 2_900_000, visitCount: 42, lastVisitAt: '2026-04-15', loyaltyTier: 'platinum', preferences: ['Dermapen', 'Hotel', 'Premium', 'Skincare'],                                   createdAt: '2023-05-20' },
+  { id: 'cli-028', name: 'Verónica Medina',        email: 'vmedina@yahoo.com',       phone: '+56 9 4560 1234', totalSpent: 450_000,   visitCount: 10, lastVisitAt: '2026-04-10', loyaltyTier: 'bronze',   preferences: ['Masaje', 'Relajante'],                                                        createdAt: '2025-05-07' },
+  { id: 'cli-029', name: 'Claudia Sepúlveda',      email: 'csepulveda@mail.cl',      phone: '+56 9 1230 9876', totalSpent: 1_230_000, visitCount: 23, lastVisitAt: '2026-04-12', loyaltyTier: 'gold',     preferences: ['Colorimetría', 'Balayage', 'Las Condes'],                                     createdAt: '2024-02-28' },
+  { id: 'cli-030', name: 'Andrea Leal',            email: 'aleal@gmail.com',         phone: '+56 9 8012 3456', totalSpent: 180_000,   visitCount: 5,  lastVisitAt: '2026-04-05', loyaltyTier: 'bronze',   preferences: ['Corte', 'Blow Dry'],                                                          createdAt: '2026-02-01' },
+];
+
+// ── Service names list (for filter dropdown) ──────────────────────────────────
+
+export const SERVICE_NAMES = MOCK_SERVICES.map((s) => s.name);

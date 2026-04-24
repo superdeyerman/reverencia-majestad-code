@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, HTMLAttributes } from 'react';
+import Image from 'next/image';
 import { Bell, Search, Menu } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -101,7 +102,13 @@ const Navbar = forwardRef<HTMLElement, NavbarProps>(
             className="ml-1 h-8 w-8 rounded-full overflow-hidden border border-border hover:border-gold transition-colors"
           >
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+              <Image
+                src={avatarUrl}
+                alt="Foto de perfil"
+                width={32}
+                height={32}
+                className="object-cover"
+              />
             ) : (
               <span className="flex h-full w-full items-center justify-center bg-gold/10 text-gold-dark text-xs font-semibold font-sans">
                 {avatarFallback.slice(0, 2).toUpperCase()}

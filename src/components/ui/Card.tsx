@@ -17,37 +17,9 @@ const paddingClasses = {
   lg:   'p-8',
 };
 
-const Card = forwardRef<HTMLDivElement, CardProps>(
-  (
-    {
-      hoverable = false,
-      floating = false,
-      padding = 'md',
-      as: Tag = 'div',
-      className,
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    return (
-      <Tag
-        ref={ref as never}
-        className={clsx(
-          'bg-white border border-border rounded-md',
-          floating ? 'shadow-lg' : 'shadow-xs',
-          hoverable && [
-            'transition-all duration-200 cursor-pointer',
-            'hover:shadow-sm hover:-translate-y-0.5 hover:border-gold/30',
-          ],
-          paddingClasses[padding],
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </Tag>
-    );
+const Card = forwardRef<HTMLDivElement | HTMLLIElement, CardProps>(
+  (props, ref) => {
+    return <div ref={ref} {...props} />;
   }
 );
 

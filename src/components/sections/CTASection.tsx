@@ -35,7 +35,7 @@ export default function CTASection() {
         <div className="flex flex-wrap justify-center gap-4 mb-14">
           <Button variant="gold" size="lg" asChild>
             <Link href="/reservar" className="inline-flex items-center gap-2">
-              Reservar con Descuento <ArrowRight size={16} />
+              Reservar con Descuento <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </Button>
           <Button variant="outline" size="lg" className="border-white/20 text-white hover:border-gold hover:text-gold" asChild>
@@ -58,22 +58,24 @@ export default function CTASection() {
             href={waLink}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`Contactar por WhatsApp al ${WHATSAPP_NUMBER}`}
             className="inline-flex items-center gap-2.5 font-sans text-sm text-white/70 hover:text-white transition-colors"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/5 border border-white/10">
+            <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/5 border border-white/10">
               <MessageCircle size={16} />
             </span>
-            {WHATSAPP_NUMBER}
+            <span>{WHATSAPP_NUMBER}</span>
           </a>
 
           <a
             href={`mailto:${EMAIL}`}
+            aria-label={`Enviar email a ${EMAIL}`}
             className="inline-flex items-center gap-2.5 font-sans text-sm text-white/70 hover:text-white transition-colors"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/5 border border-white/10">
+            <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-sm bg-white/5 border border-white/10">
               <Mail size={16} />
             </span>
-            {EMAIL}
+            <span>{EMAIL}</span>
           </a>
         </div>
 

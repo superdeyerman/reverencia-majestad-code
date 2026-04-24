@@ -49,7 +49,7 @@ function SidebarItemRow({
   const isActive = activeKey === item.key;
   const [open, setOpen] = useState(
     // auto-expand if a child is active
-    hasChildren && item.children!.some((c) => c.key === activeKey)
+    hasChildren && (item.children?.some((c) => c.key === activeKey) ?? false)
   );
 
   const handleClick = () => {
@@ -117,7 +117,7 @@ function SidebarItemRow({
 
       {hasChildren && open && !collapsed && (
         <ul className="mt-0.5 space-y-0.5">
-          {item.children!.map((child) => (
+          {item.children?.map((child) => (
             <SidebarItemRow
               key={child.key}
               item={child}

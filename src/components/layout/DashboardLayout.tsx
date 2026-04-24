@@ -143,11 +143,6 @@ export default function DashboardLayout({
     if (searchOpen) searchRef.current?.focus();
   }, [searchOpen]);
 
-  /* close mobile sidebar on route change */
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
-
   const unreadCount = DEMO_NOTIFICATIONS.filter((n) => n.unread).length;
 
   /* find active sidebar key — longest matching prefix wins */

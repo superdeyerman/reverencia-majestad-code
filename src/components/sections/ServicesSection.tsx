@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { Scissors, Palette, Hand, Sparkles, ArrowRight } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Card, CardHeader, Badge, Button } from '@/components/ui';
 
 interface Service {
   id: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   name: string;
   description: string;
   price: string;
@@ -106,9 +107,10 @@ export default function ServicesSection() {
                   </span>
                   <Link
                     href={`/reservar?servicio=${s.id}`}
+                    aria-label={`Reservar ${s.name}`}
                     className="text-xs font-sans font-medium text-gold hover:text-gold-dark inline-flex items-center gap-1 transition-colors"
                   >
-                    Reservar <ArrowRight size={12} />
+                    Reservar <ArrowRight size={12} aria-hidden="true" />
                   </Link>
                 </div>
               </Card>

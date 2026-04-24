@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 type BookingData = {
   id: string;
@@ -19,19 +20,22 @@ const MAX_ATTEMPTS = 12;
 const POLL_INTERVAL_MS = 3000;
 
 export default function SuccessPage() {
-  const [pageState, setPageState] = useState<PageState>("loading");
+  const [pageState, setPageState] = useState<PageState>(() => {
+    if (typeof window === 'undefined') return 'loading';
+    return new URLSearchParams(window.location.search).get('bookingId') ? 'loading' : 'error';
+  });
   const [booking, setBooking] = useState<BookingData | null>(null);
   const attemptsRef = useRef(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  /* SSR-safe: polling only starts on client when bookingId is present */
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const bookingId = params.get("bookingId");
+    if (typeof window === 'undefined') return;
 
-    if (!bookingId) {
-      setPageState("error");
-      return;
-    }
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get('bookingId');
+
+    if (!bookingId) return;
 
     const checkStatus = async () => {
       attemptsRef.current += 1;
@@ -128,12 +132,12 @@ export default function SuccessPage() {
             </div>
           </div>
 
-          <a
+          <Link
             href="/"
-            className="mt-8 block w-full rounded-full bg-stone-900 px-6 py-4 text-center text-sm font-medium text-white transition hover:bg-stone-700"
+            className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-gold px-6 py-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-gold-dark min-h-[44px]"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -150,12 +154,12 @@ export default function SuccessPage() {
           <p className="mt-3 text-sm text-stone-600">
             Tu pago está siendo procesado. Te notificaremos por email y WhatsApp cuando se confirme.
           </p>
-          <a
+          <Link
             href="/"
-            className="mt-8 block w-full rounded-full bg-stone-900 px-6 py-4 text-center text-sm font-medium text-white transition hover:bg-stone-700"
+            className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-gold px-6 py-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-gold-dark min-h-[44px]"
           >
             Volver al inicio
-          </a>
+          </Link>
         </div>
       </main>
     );
@@ -170,12 +174,12 @@ export default function SuccessPage() {
         <p className="mt-3 text-sm text-stone-600">
           No pudimos verificar el estado de tu pago. Si realizaste el pago, te contactaremos pronto.
         </p>
-        <a
+        <Link
           href="/reservas"
-          className="mt-8 block w-full rounded-full bg-stone-900 px-6 py-4 text-center text-sm font-medium text-white transition hover:bg-stone-700"
+          className="mt-8 inline-flex w-full items-center justify-center rounded-md bg-gold px-6 py-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-gold-dark min-h-[44px]"
         >
           Volver a reservas
-        </a>
+        </Link>
       </div>
     </main>
   );

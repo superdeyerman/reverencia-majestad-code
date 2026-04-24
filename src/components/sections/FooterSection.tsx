@@ -64,7 +64,7 @@ export default function FooterSection() {
                 aria-label="Instagram"
                 className="flex h-9 w-9 items-center justify-center rounded-sm border border-border text-gray hover:border-gold hover:text-gold transition-colors"
               >
-                <Instagram size={15} />
+                <Instagram size={15} aria-hidden="true" />
               </a>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`}
@@ -73,7 +73,7 @@ export default function FooterSection() {
                 aria-label="WhatsApp"
                 className="flex h-9 w-9 items-center justify-center rounded-sm border border-border text-gray hover:border-gold hover:text-gold transition-colors"
               >
-                <MessageCircle size={15} />
+                <MessageCircle size={15} aria-hidden="true" />
               </a>
             </div>
           </div>

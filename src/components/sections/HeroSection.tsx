@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Star, MapPin, Users } from 'lucide-react';
 import { Button } from '@/components/ui';
 
@@ -47,7 +48,7 @@ export default function HeroSection() {
             <div className="flex flex-wrap gap-8">
               {trust.map(({ icon: Icon, value, label }) => (
                 <div key={label} className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-gold/10">
+                  <div aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-sm bg-gold/10">
                     <Icon size={16} className="text-gold" />
                   </div>
                   <div>
@@ -62,10 +63,14 @@ export default function HeroSection() {
           {/* Right — image */}
           <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
             <div className="relative w-full max-w-sm lg:max-w-md aspect-[3/4] rounded-md overflow-hidden shadow-lg">
-              <img
+              <Image
                 src="/images/hero.jpg"
-                alt="Servicio de belleza a domicilio"
-                className="h-full w-full object-cover"
+                alt="Servicio de belleza a domicilio en Santiago"
+                fill
+                priority
+                quality={90}
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
               />
               {/* floating rating card */}
               <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm rounded-md px-4 py-3 shadow-sm flex items-center gap-3">
