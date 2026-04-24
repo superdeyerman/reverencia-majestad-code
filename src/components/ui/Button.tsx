@@ -1,6 +1,7 @@
 'use client';
 
 import { forwardRef, ButtonHTMLAttributes, cloneElement, isValidElement, Children } from 'react';
+import type { ReactElement } from 'react';
 import clsx from 'clsx';
 
 type Variant = 'dark' | 'gold' | 'outline' | 'ghost';
@@ -64,13 +65,20 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     );
 
     if (asChild) {
-      const child = Children.only(children);
-      if (isValidElement(child)) {
-        return cloneElement(child as React.ReactElement<Record<string, unknown>>, {
-          ...props,
-          ref,
-          className: clsx(classes, (child.props as Record<string, unknown>).className as string),
-        });
+      if (Children.count(children) === 1) {
+        const child = Children.only(children);
+        if (isValidElement(child)) {
+          const childProps = child.props as Record<string, unknown>;
+          return cloneElement(child as ReactElement<Record<string, unknown>>, {
+            ...props,
+            ref,
+            'aria-disabled': disabled || loading ? true : undefined,
+            className: clsx(classes, childProps.className as string),
+            children: inner,
+          });
+        }
+      } else if (process.env.NODE_ENV !== 'production') {
+        console.warn('Button with asChild expects exactly one child element.');
       }
     }
 

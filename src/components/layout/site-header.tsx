@@ -21,10 +21,10 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm text-stone-700 lg:flex">
-          <Link href="/#servicios">Servicios</Link>
-          <Link href="/#experiencia">Experiencia</Link>
+          <Link href="/servicios">Servicios</Link>
+          <Link href="/estilo">Estilo AI</Link>
           <Link href="/alianzas">Hoteles</Link>
-          <Link href="/reservas">Reservas</Link>
+          <Link href="/reservar">Reservar</Link>
         </nav>
 
         <div className="flex items-center gap-3">

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Reverencia Majestad social card</title>
+  <desc id="desc">Social preview image for Reverencia Majestad.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7efe2"/>
+      <stop offset="55%" stop-color="#d9bb8b"/>
+      <stop offset="100%" stop-color="#5e4427"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1010" cy="126" r="140" fill="#ffffff" opacity="0.14"/>
+  <circle cx="170" cy="560" r="120" fill="#1a1a1a" opacity="0.08"/>
+  <text x="108" y="160" fill="#8e6b3d" font-family="Arial, sans-serif" font-size="24" letter-spacing="6">LUXURY HAIR &amp; SPA MOBILE</text>
+  <text x="108" y="270" fill="#1a1a1a" font-family="Georgia, serif" font-size="82">Reverencia</text>
+  <text x="108" y="352" fill="#1a1a1a" font-family="Georgia, serif" font-size="82">Majestad</text>
+  <text x="108" y="430" fill="#5f5a52" font-family="Arial, sans-serif" font-size="34">Beauty, wellness y experiencias premium en Santiago.</text>
+  <rect x="840" y="118" width="220" height="300" rx="28" fill="#ffffff" opacity="0.78"/>
+  <circle cx="950" cy="210" r="66" fill="#e4c694"/>
+  <path d="M910 320c17-20 42-30 74-30 34 0 57 10 72 30" fill="none" stroke="#8e6b3d" stroke-width="12" stroke-linecap="round"/>
+  <rect x="864" y="468" width="176" height="22" rx="11" fill="#8e6b3d"/>
+  <rect x="894" y="520" width="116" height="16" rx="8" fill="#b9a487"/>
+</svg>

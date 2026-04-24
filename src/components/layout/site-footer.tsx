@@ -12,19 +12,26 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="space-y-3 text-sm text-stone-600">
-          <p className="font-medium uppercase tracking-[0.3em] text-stone-500">Navegación</p>
+          <p className="font-medium uppercase tracking-[0.3em] text-stone-500">Plataforma</p>
           <div className="grid gap-2">
-            <Link href="/reservas">Reservas</Link>
-            <Link href="/alianzas">Hoteles</Link>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/servicios">Servicios</Link>
+            <Link href="/estilo">Estilo AI</Link>
+            <Link href="/reservar">Reservar</Link>
+            <Link href="/alianzas">Hoteles B2B</Link>
           </div>
         </div>
         <div className="space-y-3 text-sm text-stone-600">
           <p className="font-medium uppercase tracking-[0.3em] text-stone-500">Contacto</p>
           <div className="grid gap-2">
-            <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "56912345678"}`}>WhatsApp concierge</a>
-            <a href="mailto:reservas@reverenciamajestad.cl">reservas@reverenciamajestad.cl</a>
-            <p>Santiago de Chile · Atención a domicilio y hoteles</p>
+            <a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "56963929354"}?text=${encodeURIComponent('Hola, quiero reservar una experiencia')}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp concierge
+            </a>
+            <a href="mailto:reverenciamajestad@gmail.com">reverenciamajestad@gmail.com</a>
+            <p>Santiago de Chile · Domicilio y hoteles</p>
           </div>
         </div>
       </div>

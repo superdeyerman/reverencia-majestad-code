@@ -20,13 +20,16 @@ const HAIR_LENGTH_MULTIPLIER: Record<HairLength, number> = {
   SHORT: 1,
   MEDIUM: 1.12,
   LONG: 1.28,
+  EXTRA_LONG: 1.45,
   XL: 1.45,
 };
 
 const HAIR_DENSITY_MULTIPLIER: Record<HairDensity, number> = {
+  THIN: 1,
   LIGHT: 1,
   NORMAL: 1.08,
   ABUNDANT: 1.2,
+  VERY_ABUNDANT: 1.3,
 };
 
 export function BookingForm({ services }: { services: ServiceOption[] }) {

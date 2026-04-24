@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Reverencia Majestad hero</title>
+  <desc id="desc">Luxury beauty service illustration placeholder.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7efe2"/>
+      <stop offset="55%" stop-color="#d9bb8b"/>
+      <stop offset="100%" stop-color="#8e6b3d"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#f3eadb" stop-opacity="0.92"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <circle cx="720" cy="220" r="220" fill="#ffffff" opacity="0.18"/>
+  <circle cx="220" cy="1020" r="180" fill="#1a1a1a" opacity="0.08"/>
+  <rect x="98" y="90" width="704" height="1020" rx="48" fill="url(#panel)"/>
+  <rect x="160" y="180" width="580" height="760" rx="290" fill="#1f1a17"/>
+  <ellipse cx="450" cy="446" rx="188" ry="228" fill="#f1d2bf"/>
+  <path d="M273 430c0-154 84-276 177-276 119 0 177 126 177 258 0 118-76 193-177 193-90 0-177-76-177-175Z" fill="#3f2f24"/>
+  <path d="M308 644c40-31 82-42 142-42 62 0 115 15 146 42l30 250H274l34-250Z" fill="#ffffff" opacity="0.86"/>
+  <path d="M372 444c18-16 44-25 79-25 34 0 60 9 77 25" fill="none" stroke="#7d5639" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="385" cy="483" r="13" fill="#2b211b"/>
+  <circle cx="515" cy="483" r="13" fill="#2b211b"/>
+  <path d="M402 555c22 20 72 20 96 0" fill="none" stroke="#9b6346" stroke-width="12" stroke-linecap="round"/>
+  <rect x="150" y="860" width="600" height="150" rx="28" fill="#fffaf1" opacity="0.9"/>
+  <text x="190" y="918" fill="#6d573c" font-family="Georgia, serif" font-size="34">Luxury Hair &amp; Spa</text>
+  <text x="190" y="962" fill="#7e7468" font-family="Arial, sans-serif" font-size="24">Atencion premium a domicilio y hotel</text>
+</svg>

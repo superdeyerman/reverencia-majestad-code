@@ -576,6 +576,13 @@ export const ProLevelCard = memo(function ProLevelCard({
     return Math.max(0, LEVEL_CONFIG[nextLevel].bookingsNeeded - completedBookings);
   }, [isPlatinum, nextLevel, completedBookings]);
 
+  const levelBarColors: Record<string, string> = {
+    bronze:   'bg-orange',
+    silver:   'bg-gray',
+    gold:     'bg-gold',
+    platinum: 'bg-blue',
+  };
+
   return (
     <article className="bg-white border border-border rounded-lg shadow-xs hover:shadow-sm transition-all duration-200 overflow-hidden">
 
@@ -633,12 +640,10 @@ export const ProLevelCard = memo(function ProLevelCard({
               </div>
               <div className="h-1.5 w-full bg-white/60 rounded-full overflow-hidden border border-white/40">
                 <div
-                  className={clsx('h-full rounded-full transition-all duration-500', {
-                    'bg-orange':    level === 'bronze',
-                    'bg-gray':      level === 'silver',
-                    'bg-gold':      level === 'gold',
-                    'bg-blue':      level === 'platinum',
-                  })}
+                  className={clsx(
+                    'h-full rounded-full transition-all duration-500',
+                    levelBarColors[level] ?? 'bg-blue',
+                  )}
                   style={{ width: `${progress}%` }}
                   role="progressbar"
                   aria-valuenow={progress}

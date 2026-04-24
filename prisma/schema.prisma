@@ -10,7 +10,10 @@ datasource db {
 
 enum Role {
   ADMIN
+  CUSTOMER
   PROFESSIONAL
+  HOTEL_MANAGER
+  STAFF
   CLIENT
 }
 
@@ -28,15 +31,19 @@ enum ServiceCategory {
 
 enum BookingStatus {
   PENDING
+  PENDING_PAYMENT
   PAYMENT_PENDING
   CONFIRMED
   IN_PROGRESS
   COMPLETED
   CANCELLED
   PAYMENT_FAILED
+  RESCHEDULED
+  ARCHIVED
 }
 
 enum BookingModality {
+  STUDIO
   HOME
   HOTEL
   PRIVATE_STUDIO
@@ -46,13 +53,16 @@ enum HairLength {
   SHORT
   MEDIUM
   LONG
+  EXTRA_LONG
   XL
 }
 
 enum HairDensity {
+  THIN
   LIGHT
   NORMAL
   ABUNDANT
+  VERY_ABUNDANT
 }
 
 enum ProfessionalKind {
@@ -60,9 +70,39 @@ enum ProfessionalKind {
   THERAPIST
 }
 
+enum ProfLevel {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum LoyaltyTier {
+  STANDARD
+  SILVER
+  GOLD
+  VIP
+  PLATINUM
+}
+
+enum HotelStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
 enum NotificationChannel {
   EMAIL
   WHATSAPP
+  IN_APP
 }
 
 enum NotificationType {
@@ -70,6 +110,8 @@ enum NotificationType {
   BOOKING_REMINDER
   REVIEW_REQUEST
   REBOOKING_OFFER
+  PAYMENT_UPDATE
+  GENERAL
 }
 
 enum PaymentProvider {
@@ -85,6 +127,7 @@ enum PaymentStatus {
   REFUNDED
   CHARGED_BACK
   FAILED
+  IN_PROCESS
 }
 
 enum PaymentType {
@@ -95,48 +138,22 @@ enum PaymentType {
 
 model User {
   id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String?
   name         String
-  phone        String
-  role         Role     @default(CLIENT)
+  email        String   @unique
+  phone        String?
+  passwordHash String?
+  role         Role     @default(CUSTOMER)
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now()) @updatedAt
 
-  customer     CustomerProfile?
-  professional ProfessionalProfile?
+  customer      CustomerProfile?
+  professional  ProfessionalProfile?
+  notifications Notification[]
+  auditLogs     AuditLog[]
 
   bookings      Booking[]      @relation("CustomerBookings")
   assignedJobs  Booking[]      @relation("AssignedProfessional")
   notesAuthored InternalNote[]
-}
-
-model CustomerProfile {
-  id            String    @id @default(cuid())
-  userId        String    @unique
-  segment       Segment   @default(NEW)
-  visitCount    Int       @default(0)
-  totalSpent    Int       @default(0)
-  lastVisitAt   DateTime?
-  preferences   String?
-  customerSince DateTime  @default(now())
-
-  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes InternalNote[]
-}
-
-model ProfessionalProfile {
-  id             String           @id @default(cuid())
-  userId         String           @unique
-  kind           ProfessionalKind
-  bio            String?
-  specialties    String[]
-  commissionRate Float            @default(0.35)
-  isActive       Boolean          @default(true)
-  city           String           @default("Santiago")
-
-  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  services ProfessionalService[]
 }
 
 model Service {
@@ -147,14 +164,157 @@ model Service {
   description         String
   basePrice           Int
   durationMinutes     Int
+  imageUrl            String?
   supportsHome        Boolean         @default(true)
   supportsHotel       Boolean         @default(true)
   supportsHairMetrics Boolean         @default(false)
-  isFeatured          Boolean         @default(false)
   isActive            Boolean         @default(true)
+  isFeatured          Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @default(now()) @updatedAt
 
   bookings      Booking[]
   professionals ProfessionalService[]
+}
+
+model Booking {
+  id                 String           @id @default(cuid())
+  code               String           @unique
+  customerId         String
+  professionalId     String?
+  serviceId          String
+  hotelPartnerId     String?
+  status             BookingStatus    @default(PENDING_PAYMENT)
+  modality           BookingModality
+  appointmentAt      DateTime
+  address            String?
+  district           String?
+  latitude           Float?
+  longitude          Float?
+  hotelName          String?
+  roomNumber         String?
+  hairLength         HairLength?
+  hairDensity        HairDensity?
+  notes              String?
+  subtotal           Int
+  surchargeLength    Int              @default(0)
+  surchargeAbundance Int              @default(0)
+  surchargeDomicile  Int              @default(0)
+  distanceFee        Int              @default(0)
+  totalAmount        Int
+  depositAmount      Int
+  balanceAmount      Int              @default(0)
+  paidAmountTotal    Int              @default(0)
+  isDepositPaid      Boolean          @default(false)
+  paidAt             DateTime?
+  reminderSentAt     DateTime?
+  paymentProvider    PaymentProvider?
+  externalReference  String?          @unique
+  lastPaymentId      String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now()) @updatedAt
+
+  customer     User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  professional User?         @relation("AssignedProfessional", fields: [professionalId], references: [id], onDelete: SetNull)
+  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  hotelPartner HotelPartner? @relation(fields: [hotelPartnerId], references: [id], onDelete: SetNull)
+  lastPayment  Payment?      @relation("LastBookingPayment", fields: [lastPaymentId], references: [id], onDelete: SetNull)
+
+  payments      Payment[]         @relation("BookingPayments")
+  notifications NotificationLog[]
+
+  @@index([customerId])
+  @@index([professionalId])
+  @@index([serviceId])
+  @@index([hotelPartnerId])
+  @@index([status])
+  @@index([appointmentAt])
+}
+
+model Payment {
+  id                        String          @id @default(cuid())
+  bookingId                 String
+  provider                  PaymentProvider @default(MERCADO_PAGO)
+  type                      PaymentType     @default(DEPOSIT)
+  status                    PaymentStatus   @default(CREATED)
+  externalReference         String
+  providerPaymentId         String?         @unique
+  providerPreferenceId      String?
+  providerMerchantOrderId   String?
+  currency                  String          @default("CLP")
+  amount                    Int
+  netAmount                 Int?
+  feeAmount                 Int?
+  paidAt                    DateTime?
+  expiresAt                 DateTime?
+  statusDetail              String?
+  rejectionReason           String?
+  description               String?
+  payerEmail                String?
+  payerFirstName            String?
+  payerLastName             String?
+  payerIdentificationType   String?
+  payerIdentificationNumber String?
+  rawPayload                Json?
+  rawCreatePayload          Json?
+  rawWebhookPayload         Json?
+  rawProviderPayment        Json?
+  idempotencyKey            String?
+  processedAt               DateTime?
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @default(now()) @updatedAt
+
+  booking            Booking        @relation("BookingPayments", fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingLastPayment Booking[]      @relation("LastBookingPayment")
+  events             PaymentEvent[]
+
+  @@unique([provider, externalReference, type])
+  @@index([bookingId])
+  @@index([provider, status])
+}
+
+model CustomerProfile {
+  id            String      @id @default(cuid())
+  userId        String      @unique
+  phone         String?
+  totalSpent    Int         @default(0)
+  visits        Int         @default(0)
+  visitCount    Int         @default(0)
+  loyaltyTier   LoyaltyTier @default(STANDARD)
+  segment       Segment     @default(NEW)
+  lastVisitAt   DateTime?
+  notes         String?
+  preferences   Json?
+  customerSince DateTime    @default(now())
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now()) @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notesRelation InternalNote[] @relation("CustomerNotes")
+}
+
+model ProfessionalProfile {
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  kind                 ProfessionalKind
+  level                ProfLevel        @default(BRONZE)
+  specialties          String[]
+  bio                  String?
+  photoUrl             String?
+  rating               Float            @default(0)
+  reviews              Int              @default(0)
+  commissionRate       Float            @default(0.20)
+  commissionPercentage Float            @default(20)
+  completedBookings    Int              @default(0)
+  totalEarnings        Int              @default(0)
+  city                 String           @default("Santiago")
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @default(now()) @updatedAt
+
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  availability Availability[]
+  services     ProfessionalService[]
 }
 
 model ProfessionalService {
@@ -168,180 +328,86 @@ model ProfessionalService {
   @@unique([professionalId, serviceId])
 }
 
+model Availability {
+  id             String  @id @default(cuid())
+  professionalId String
+  weekday        Int
+  startTime      String
+  endTime        String
+  isAvailable    Boolean @default(true)
+
+  professional ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, weekday])
+}
+
 model HotelPartner {
-  id             String   @id @default(cuid())
+  id             String      @id @default(cuid())
   name           String
   contactName    String
-  email          String   @unique
+  email          String      @unique
   phone          String
-  address        String
-  district       String
-  commissionRate Float    @default(0.12)
+  address        String?
+  district       String?
+  commissionRate Float       @default(0.12)
+  status         HotelStatus @default(ACTIVE)
   notes          String?
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now())
+  active         Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now()) @updatedAt
 
   bookings Booking[]
 }
 
 model HotelLead {
-  id            String   @id @default(cuid())
+  id            String     @id @default(cuid())
   hotelName     String
   contactName   String
   email         String
-  phone         String
-  rooms         Int
-  averageTicket Int
+  phone         String?
+  rooms         Int?
+  averageTicket Int?
+  message       String?
   notes         String?
-  createdAt     DateTime @default(now())
+  status        LeadStatus @default(NEW)
+  createdAt     DateTime   @default(now())
 }
 
-model Booking {
-  id             String  @id @default(cuid())
-  code           String  @unique
-  customerId     String
-  professionalId String?
-  serviceId      String
-  hotelPartnerId String?
-
-  status        BookingStatus   @default(PENDING)
-  modality      BookingModality
-  appointmentAt DateTime
-
-  address   String?
-  district  String?
-  latitude  Float?
-  longitude Float?
-
-  hotelName  String?
-  roomNumber String?
-
-  hairLength  HairLength?
-  hairDensity HairDensity?
-  notes       String?
-
-  subtotal      Int
-  distanceFee   Int @default(0)
-  depositAmount Int @default(5000)
-  totalAmount   Int
-
-  paidAmountTotal Int       @default(0)
-  isDepositPaid   Boolean   @default(false)
-  paidAt          DateTime?
-
-  paymentProvider   PaymentProvider?
-  externalReference String?          @unique
-  lastPaymentId     String?
-  lastPayment       Payment?         @relation("LastBookingPayment", fields: [lastPaymentId], references: [id], onDelete: SetNull)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  customer     User          @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
-  professional User?         @relation("AssignedProfessional", fields: [professionalId], references: [id], onDelete: SetNull)
-  service      Service       @relation(fields: [serviceId], references: [id], onDelete: Restrict)
-  hotelPartner HotelPartner? @relation(fields: [hotelPartnerId], references: [id], onDelete: SetNull)
-
-  notifications NotificationLog[]
-  payments      Payment[]         @relation("BookingPayments")
-
-  @@index([customerId])
-  @@index([professionalId])
-  @@index([serviceId])
-  @@index([hotelPartnerId])
-  @@index([status])
-  @@index([appointmentAt])
-  @@index([externalReference])
-}
-
-model Payment {
-  id        String          @id @default(cuid())
-  bookingId String
-  provider  PaymentProvider
-  type      PaymentType     @default(DEPOSIT)
-  status    PaymentStatus   @default(CREATED)
-
-  externalReference       String
-  providerPaymentId       String? @unique
-  providerPreferenceId    String?
-  providerMerchantOrderId String?
-
-  currency  String @default("CLP")
-  amount    Int
-  netAmount Int?
-  feeAmount Int?
-
-  paidAt    DateTime?
-  expiresAt DateTime?
-
-  statusDetail    String?
-  rejectionReason String?
-  description     String?
-
-  payerEmail                String?
-  payerFirstName            String?
-  payerLastName             String?
-  payerIdentificationType   String?
-  payerIdentificationNumber String?
-
-  rawCreatePayload   Json?
-  rawWebhookPayload  Json?
-  rawProviderPayment Json?
-
-  idempotencyKey String?
-  processedAt    DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  booking            Booking        @relation("BookingPayments", fields: [bookingId], references: [id], onDelete: Cascade)
-  events             PaymentEvent[]
-  bookingLastPayment Booking[]      @relation("LastBookingPayment")
-
-  @@unique([provider, externalReference, type])
-  @@index([bookingId])
-  @@index([provider, status])
-  @@index([externalReference])
-  @@index([providerPaymentId])
-}
-
-model PaymentEvent {
-  id                String          @id @default(cuid())
-  paymentId         String?
-  provider          PaymentProvider
-  eventType         String?
-  action            String?
-  topic             String?
-  resourceId        String?
-  externalReference String?
-
-  notificationId   String?
-  webhookSignature String?
-
-  payload      Json
-  isProcessed  Boolean   @default(false)
-  processedAt  DateTime?
-  errorMessage String?
-
-  createdAt DateTime @default(now())
-
-  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
-
-  @@unique([provider, notificationId])
-  @@index([paymentId])
-  @@index([provider, resourceId])
-  @@index([externalReference])
-}
-
-model InternalNote {
+model Testimonial {
   id         String   @id @default(cuid())
-  customerId String
-  authorId   String
-  body       String
+  clientName String
+  text       String
+  rating     Int
+  photoUrl   String?
+  isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
+}
 
-  customer CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  author   User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  channel   NotificationChannel @default(IN_APP)
+  type      NotificationType
+  title     String
+  message   String
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model NotificationLog {
@@ -358,4 +424,39 @@ model NotificationLog {
 
   @@index([bookingId])
   @@index([scheduledFor])
+}
+
+model PaymentEvent {
+  id                String          @id @default(cuid())
+  paymentId         String?
+  provider          PaymentProvider
+  eventType         String?
+  action            String?
+  topic             String?
+  resourceId        String?
+  externalReference String?
+  notificationId    String?
+  webhookSignature  String?
+  payload           Json
+  isProcessed       Boolean         @default(false)
+  processedAt       DateTime?
+  errorMessage      String?
+  createdAt         DateTime        @default(now())
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, notificationId])
+  @@index([paymentId])
+  @@index([provider, resourceId])
+}
+
+model InternalNote {
+  id         String   @id @default(cuid())
+  customerId String
+  authorId   String
+  body       String
+  createdAt  DateTime @default(now())
+
+  customer CustomerProfile @relation("CustomerNotes", fields: [customerId], references: [id], onDelete: Cascade)
+  author   User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }

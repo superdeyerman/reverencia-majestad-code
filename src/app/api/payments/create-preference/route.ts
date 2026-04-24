@@ -1,180 +1,54 @@
 import { BookingStatus, PaymentProvider, PaymentStatus, PaymentType } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { createAuditLog } from "@/lib/audit";
+import { createPreference } from "@/lib/mercadopago";
 import { prisma } from "@/lib/prisma";
+import { createPreferenceSchema } from "@/lib/validations";
 
-type CreatePreferenceBody = {
-  bookingId?: string;
-};
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = (await req.json()) as CreatePreferenceBody;
-    const bookingId = body.bookingId?.trim();
-
-    // =========================
-    // VALIDACIÓN INPUT
-    // =========================
-    if (!bookingId) {
+    const payload = createPreferenceSchema.safeParse(await request.json());
+    if (!payload.success) {
       return NextResponse.json(
-        { error: "bookingId es obligatorio" },
-        { status: 400 }
+        { error: "Solicitud inválida", issues: payload.error.flatten() },
+        { status: 400 },
       );
     }
 
-    const mpAccessToken = process.env.MP_ACCESS_TOKEN;
-    const appUrl = process.env.APP_URL;
-
-    if (!mpAccessToken) {
-      console.error("❌ MP_ACCESS_TOKEN faltante");
-      return NextResponse.json(
-        { error: "Configuración de pagos incompleta" },
-        { status: 500 }
-      );
-    }
-
-    if (!appUrl) {
-      console.error("❌ APP_URL faltante");
-      return NextResponse.json(
-        { error: "Configuración de aplicación incompleta" },
-        { status: 500 }
-      );
-    }
-
-    // =========================
-    // BUSCAR RESERVA
-    // =========================
     const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-      select: {
-        id: true,
-        code: true,
-        totalAmount: true,
-        depositAmount: true,
-        isDepositPaid: true,
-        status: true,
-        customer: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
+      where: { id: payload.data.bookingId },
+      include: {
+        customer: true,
+        service: true,
       },
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { error: "Reserva no encontrada" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Reserva no encontrada" }, { status: 404 });
     }
 
-    // =========================
-    // VALIDACIONES DE NEGOCIO
-    // =========================
     if (
       booking.status === BookingStatus.CANCELLED ||
-      booking.status === BookingStatus.COMPLETED
+      booking.status === BookingStatus.COMPLETED ||
+      booking.status === BookingStatus.ARCHIVED
     ) {
-      return NextResponse.json(
-        { error: "La reserva no permite pagos" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "La reserva no admite pagos" }, { status: 409 });
     }
 
     if (booking.isDepositPaid) {
-      return NextResponse.json(
-        { error: "La reserva ya tiene el abono pagado" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "La reserva ya tiene su abono confirmado" }, { status: 409 });
     }
 
-    const amount = Number(booking.depositAmount);
+    const amount = booking.depositAmount;
+    const preference = await createPreference({
+      bookingId: booking.id,
+      bookingCode: booking.code,
+      serviceName: booking.service.name,
+      customerName: booking.customer.name,
+      customerEmail: booking.customer.email,
+      amount,
+    });
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return NextResponse.json(
-        { error: "Monto inválido" },
-        { status: 400 }
-      );
-    }
-
-    // =========================
-    // PAYLOAD MERCADO PAGO
-    // =========================
-    const preferencePayload = {
-      items: [
-        {
-          id: booking.id,
-          title: `Reserva ${booking.code}`,
-          description: "Abono Reverencia Majestad",
-          quantity: 1,
-          currency_id: "CLP",
-          unit_price: amount,
-        },
-      ],
-
-      payer: booking.customer?.email
-        ? {
-            name: booking.customer.name ?? "Cliente",
-            email: booking.customer.email,
-          }
-        : undefined,
-
-      external_reference: booking.id,
-
-      metadata: {
-        booking_id: booking.id,
-        booking_code: booking.code,
-        source: "reverencia-majestad",
-      },
-
-      back_urls: {
-        success: `${appUrl}/checkout/success?bookingId=${booking.id}`,
-        failure: `${appUrl}/checkout/failure?bookingId=${booking.id}`,
-        pending: `${appUrl}/checkout/pending?bookingId=${booking.id}`,
-      },
-
-      auto_return: "approved",
-
-      notification_url: `${appUrl}/api/webhooks/mercadopago`,
-
-      statement_descriptor: "REVERENCIA SPA",
-    };
-
-    // =========================
-    // LLAMADA A MERCADO PAGO
-    // =========================
-    const response = await fetch(
-      "https://api.mercadopago.com/checkout/preferences",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${mpAccessToken}`,
-        },
-        body: JSON.stringify(preferencePayload),
-        cache: "no-store",
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("❌ Error Mercado Pago:", data);
-
-      return NextResponse.json(
-        {
-          error: "Error creando preferencia",
-          detail: data,
-        },
-        { status: response.status || 500 }
-      );
-    }
-
-    // =========================
-    // REGISTRAR PAYMENT (CREATED)
-    // =========================
-    // Upsert: si ya existe (retry), actualiza preferenceId y resetea a CREATED
-    // Solo si no está APPROVED (no podría llegar aquí, pero doble seguro)
     await prisma.payment.upsert({
       where: {
         provider_externalReference_type: {
@@ -184,41 +58,51 @@ export async function POST(req: Request) {
         },
       },
       update: {
-        status: PaymentStatus.CREATED,
-        providerPreferenceId: data.id,
-        providerPaymentId: null,
+        status: PaymentStatus.PENDING,
+        providerPreferenceId: preference.preferenceId,
         amount,
+        rawCreatePayload: preference.rawPayload,
       },
       create: {
         bookingId: booking.id,
         provider: PaymentProvider.MERCADO_PAGO,
         type: PaymentType.DEPOSIT,
-        status: PaymentStatus.CREATED,
+        status: PaymentStatus.PENDING,
         externalReference: booking.id,
-        providerPreferenceId: data.id,
-        currency: "CLP",
+        providerPreferenceId: preference.preferenceId,
         amount,
         description: `Abono reserva ${booking.code}`,
+        rawCreatePayload: preference.rawPayload,
       },
     });
 
-    // =========================
-    // RESPUESTA FINAL
-    // =========================
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: { status: BookingStatus.PENDING_PAYMENT },
+    });
+
+    await createAuditLog({
+      userId: booking.customerId,
+      action: "PAYMENT_PREFERENCE_CREATED",
+      entity: "Booking",
+      entityId: booking.id,
+      metadata: {
+        provider: PaymentProvider.MERCADO_PAGO,
+        preferenceId: preference.preferenceId,
+        amount,
+      },
+    });
+
     return NextResponse.json({
-      id: data.id,
-      init_point: data.init_point,
-      sandbox_init_point: data.sandbox_init_point ?? null,
       bookingId: booking.id,
       bookingCode: booking.code,
       amount,
+      init_point: preference.initPoint,
+      sandbox_init_point: preference.sandboxInitPoint,
+      providerPreferenceId: preference.preferenceId,
     });
   } catch (error) {
-    console.error("🔥 Error interno create-preference:", error);
-
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    console.error("create-preference error", error);
+    return NextResponse.json({ error: "No fue posible crear la preferencia de pago" }, { status: 500 });
   }
 }

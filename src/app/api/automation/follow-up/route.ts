@@ -74,7 +74,14 @@ export async function POST(request: Request) {
       serviceName: item.booking.service.name,
     });
 
-    const destination = item.channel === NotificationChannel.EMAIL ? item.booking.customer.email : item.booking.customer.phone.replace(/\D/g, "");
+    const destination =
+      item.channel === NotificationChannel.EMAIL
+        ? item.booking.customer.email
+        : item.booking.customer.phone?.replace(/\D/g, "") ?? "";
+
+    if (!destination) {
+      continue;
+    }
     const ok = await dispatchByChannel({
       channel: item.channel,
       destination,

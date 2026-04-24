@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Instagram, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
-const WHATSAPP_NUMBER = '+56912345678';
-const EMAIL = 'hola@reverenciamajestad.cl';
+const WHATSAPP_NUMBER = '+56963929354';
+const EMAIL = 'reverenciamajestad@gmail.com';
 const CURRENT_YEAR = new Date().getFullYear();
 
 const columns = [
@@ -64,7 +64,16 @@ export default function FooterSection() {
                 aria-label="Instagram"
                 className="flex h-9 w-9 items-center justify-center rounded-sm border border-border text-gray hover:border-gold hover:text-gold transition-colors"
               >
-                <Instagram size={15} aria-hidden="true" />
+                <svg
+                  width="15" height="15" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
               </a>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`}

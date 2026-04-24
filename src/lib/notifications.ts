@@ -1,4 +1,5 @@
 import { NotificationChannel, NotificationType } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 export function buildNotificationMessage({
   type,
@@ -21,34 +22,53 @@ export function buildNotificationMessage({
   switch (type) {
     case NotificationType.BOOKING_CONFIRMED:
       return {
+        title: "Reserva confirmada",
         subject: `Reserva confirmada ${bookingCode}`,
-        text: `Hola ${customerName}, tu reserva ${bookingCode} para ${serviceName} fue recibida. Fecha: ${formattedDate}.`,
+        text: `Hola ${customerName}, tu reserva ${bookingCode} para ${serviceName} fue confirmada para ${formattedDate}.`,
       };
     case NotificationType.BOOKING_REMINDER:
       return {
+        title: "Recordatorio de servicio",
         subject: `Recordatorio ${bookingCode}`,
-        text: `Te esperamos en tu experiencia ${serviceName}. Recordatorio de cita: ${formattedDate}.`,
+        text: `Te recordamos tu experiencia ${serviceName} agendada para ${formattedDate}.`,
       };
-    case NotificationType.REVIEW_REQUEST:
+    case NotificationType.PAYMENT_UPDATE:
       return {
-        subject: `¿Cómo estuvo tu experiencia ${bookingCode}?`,
-        text: `Gracias por elegir Reverencia Majestad. Queremos tu reseña sobre ${serviceName}.`,
-      };
-    case NotificationType.REBOOKING_OFFER:
-      return {
-        subject: `Tu próximo ritual premium`,
-        text: `Tenemos disponibilidad prioritaria para tu próxima experiencia ${serviceName}. Responde este mensaje para reagendar.`,
+        title: "Actualización de pago",
+        subject: `Pago actualizado ${bookingCode}`,
+        text: `Tu pago de la reserva ${bookingCode} fue actualizado correctamente.`,
       };
     default:
       return {
-        subject: `Actualización de tu experiencia ${bookingCode}`,
-        text: `Hola ${customerName}, tenemos una actualización sobre ${serviceName}.`,
+        title: "Actualización Reverencia",
+        subject: `Actualización ${bookingCode}`,
+        text: `Tenemos una actualización sobre tu experiencia ${serviceName}.`,
       };
   }
 }
 
+export async function createNotification(
+  userId: string,
+  type: NotificationType,
+  title: string,
+  message: string,
+  channel: NotificationChannel = NotificationChannel.IN_APP,
+) {
+  return prisma.notification.create({
+    data: {
+      userId,
+      type,
+      title,
+      message,
+      channel,
+    },
+  });
+}
+
 export async function sendEmail({ to, subject, text }: { to: string; subject: string; text: string }) {
-  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM) return false;
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM) {
+    return false;
+  }
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -68,7 +88,9 @@ export async function sendEmail({ to, subject, text }: { to: string; subject: st
 }
 
 export async function sendWhatsApp({ to, text }: { to: string; text: string }) {
-  if (!process.env.WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) return false;
+  if (!process.env.WHATSAPP_TOKEN || !process.env.WHATSAPP_PHONE_NUMBER_ID) {
+    return false;
+  }
 
   const response = await fetch(
     `https://graph.facebook.com/v23.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`,
@@ -104,5 +126,8 @@ export async function dispatchByChannel({
   if (channel === NotificationChannel.EMAIL) {
     return sendEmail({ to: destination, subject, text });
   }
-  return sendWhatsApp({ to: destination, text });
+  if (channel === NotificationChannel.WHATSAPP) {
+    return sendWhatsApp({ to: destination, text });
+  }
+  return true;
 }
