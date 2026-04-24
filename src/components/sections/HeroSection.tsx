@@ -56,13 +56,11 @@ export default function HeroSection() {
           <div className="mt-8 flex flex-wrap gap-4">
             <Button variant="dark" size="lg" asChild>
               <Link href="/reservar">
-                <span className="inline-flex items-center gap-2">
-                  Reservar experiencia <ArrowRight size={16} aria-hidden="true" />
-                </span>
+                Reservar experiencia <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="#servicios">Explorar servicios</Link>
+              <a href="#servicios">Explorar servicios</a>
             </Button>
           </div>
 
