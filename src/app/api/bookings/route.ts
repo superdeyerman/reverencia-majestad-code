@@ -3,7 +3,6 @@ import { BookingModality, HairDensity, HairLength, NotificationChannel, Notifica
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { assignProfessional } from "@/lib/availability";
-import { createDepositCheckout } from "@/lib/mercadopago";
 import { calculateBookingPricing } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { bookingCode } from "@/lib/utils";
@@ -124,12 +123,13 @@ export async function POST(request: Request) {
     ],
   });
 
-  const checkoutUrl = await createDepositCheckout({
-    bookingId: booking.id,
-    code: booking.code,
-    serviceName: service.name,
-    depositAmount: booking.depositAmount,
+  return NextResponse.json({
+    booking: {
+      id: booking.id,
+      code: booking.code,
+      depositAmount: booking.depositAmount,
+      totalAmount: booking.totalAmount,
+      status: booking.status,
+    },
   });
-
-  return NextResponse.json({ booking, checkoutUrl });
 }

@@ -6,7 +6,6 @@ import { formatCLP } from "@/lib/utils";
 
 type ServiceOption = {
   id: string;
-  slug: string;
   name: string;
   category: ServiceCategory;
   description: string;
@@ -42,7 +41,8 @@ export function BookingForm({ services }: { services: ServiceOption[] }) {
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ code: string; checkoutUrl?: string } | null>(null);
+  const [loadingStep, setLoadingStep] = useState<"booking" | "payment">("booking");
+  const [result, setResult] = useState<{ code: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const selectedService = useMemo(
@@ -89,6 +89,7 @@ export function BookingForm({ services }: { services: ServiceOption[] }) {
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
+    setLoadingStep("booking");
     setError(null);
     setResult(null);
 
@@ -111,24 +112,41 @@ export function BookingForm({ services }: { services: ServiceOption[] }) {
       longitude,
     };
 
-    const response = await fetch("/api/bookings", {
+    const bookingRes = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
-    setLoading(false);
+    const bookingData = await bookingRes.json();
 
-    if (!response.ok) {
-      setError(data.error ?? "No fue posible crear la reserva.");
+    if (!bookingRes.ok) {
+      setLoading(false);
+      setError(bookingData.error ?? "No fue posible crear la reserva.");
       return;
     }
 
-    setResult({ code: data.booking.code, checkoutUrl: data.checkoutUrl });
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl;
+    const bookingId: string = bookingData.booking.id;
+    const bookingCode: string = bookingData.booking.code;
+    setResult({ code: bookingCode });
+
+    setLoadingStep("payment");
+
+    const prefRes = await fetch("/api/payments/create-preference", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId }),
+    });
+
+    const prefData = await prefRes.json();
+    setLoading(false);
+
+    if (!prefRes.ok) {
+      setError(prefData.error ?? "No fue posible iniciar el pago. Tu reserva fue creada con código " + bookingCode + ".");
+      return;
     }
+
+    window.location.href = prefData.init_point;
   }
 
   return (
@@ -253,12 +271,16 @@ export function BookingForm({ services }: { services: ServiceOption[] }) {
         {error ? <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
         {result ? (
           <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-            Reserva creada con código <strong>{result.code}</strong>. {result.checkoutUrl ? "Redirigiendo a Mercado Pago..." : "Puedes confirmar el abono manualmente desde el panel."}
+            Reserva creada con código <strong>{result.code}</strong>. Redirigiendo a Mercado Pago...
           </div>
         ) : null}
 
         <button disabled={loading || !selectedSlot} className="w-full rounded-full bg-stone-900 px-6 py-4 text-sm font-medium text-white transition hover:bg-stone-700 disabled:opacity-60">
-          {loading ? "Creando reserva..." : `Reservar con abono desde ${formatCLP(deposit)}`}
+          {loading && loadingStep === "booking"
+            ? "Creando reserva..."
+            : loading && loadingStep === "payment"
+              ? "Iniciando pago..."
+              : `Reservar con abono desde ${formatCLP(deposit)}`}
         </button>
       </form>
 

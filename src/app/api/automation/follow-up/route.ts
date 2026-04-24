@@ -1,10 +1,24 @@
 import { addHours, subHours } from "date-fns";
-import { BookingStatus, NotificationChannel, NotificationType } from "@prisma/client";
+import { BookingStatus, NotificationChannel, NotificationType, Role } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
 import { buildNotificationMessage, dispatchByChannel } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
-export async function POST() {
+export async function POST(request: Request) {
+  // Acepta CRON_SECRET vía Bearer token (para Vercel Cron Jobs)
+  // o sesión válida de ADMIN para disparo manual desde el dashboard
+  const cronSecret = process.env.CRON_SECRET;
+  const authHeader = request.headers.get("authorization");
+
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    // Autorizado por cron secret — continuar
+  } else {
+    const session = await getSession();
+    if (!session || session.role !== Role.ADMIN) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+  }
   const now = new Date();
 
   const completedBookings = await prisma.booking.findMany({

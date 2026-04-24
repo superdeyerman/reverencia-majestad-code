@@ -9,8 +9,8 @@ export async function createDepositCheckout({
   serviceName: string;
   depositAmount: number;
 }) {
-  const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  const appUrl = process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!accessToken) return null;
 
@@ -23,6 +23,7 @@ export async function createDepositCheckout({
     body: JSON.stringify({
       items: [
         {
+          id: bookingId,
           title: `Abono ${serviceName}`,
           quantity: 1,
           currency_id: "CLP",
@@ -30,13 +31,19 @@ export async function createDepositCheckout({
         },
       ],
       external_reference: bookingId,
+      metadata: {
+        booking_id: bookingId,
+        booking_code: code,
+        source: "reverencia-majestad",
+      },
       back_urls: {
-        success: `${appUrl}/dashboard?payment=success&booking=${code}`,
-        pending: `${appUrl}/dashboard?payment=pending&booking=${code}`,
-        failure: `${appUrl}/dashboard?payment=failure&booking=${code}`,
+        success: `${appUrl}/checkout/success?bookingId=${bookingId}`,
+        pending: `${appUrl}/checkout/pending?bookingId=${bookingId}`,
+        failure: `${appUrl}/checkout/failure?bookingId=${bookingId}`,
       },
       auto_return: "approved",
       notification_url: `${appUrl}/api/webhooks/mercadopago`,
+      statement_descriptor: "REVERENCIA SPA",
     }),
   });
 

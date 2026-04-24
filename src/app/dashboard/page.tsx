@@ -5,22 +5,9 @@ import { NoteForm } from "@/components/dashboard/note-form";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { getSession, requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCLP } from "@/lib/utils";
+import { formatCLP, formatCommission, formatDateShort, statusLabel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-function statusLabel(status: BookingStatus) {
-  switch (status) {
-    case BookingStatus.PENDING:
-      return "pendiente";
-    case BookingStatus.CONFIRMED:
-      return "confirmado";
-    case BookingStatus.COMPLETED:
-      return "realizado";
-    case BookingStatus.CANCELLED:
-      return "cancelado";
-  }
-}
 
 export default async function DashboardPage({
   searchParams,
@@ -263,7 +250,7 @@ export default async function DashboardPage({
                       <p className="text-sm text-stone-500">{professional.kind}</p>
                     </div>
                     <div className="text-right text-sm text-stone-600">
-                      <p>{Math.round(professional.commissionRate * 100)}% comisión</p>
+                      <p>{formatCommission(professional.commissionRate)} comisión</p>
                       <p>{professional.isActive ? "Activo" : "Inactivo"}</p>
                     </div>
                   </div>
@@ -292,7 +279,7 @@ export default async function DashboardPage({
                       <p className="text-sm text-stone-500">{hotel.contactName} · {hotel.district}</p>
                     </div>
                     <div className="text-right text-sm text-stone-600">
-                      <p>{Math.round(hotel.commissionRate * 100)}% comisión</p>
+                      <p>{formatCommission(hotel.commissionRate)} comisión</p>
                       <p>{hotel.active ? "Activo" : "Pausado"}</p>
                     </div>
                   </div>
@@ -350,7 +337,7 @@ export default async function DashboardPage({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-medium text-stone-900">{booking.service.name}</p>
-                    <p className="text-sm text-stone-500">{booking.customer.name} · {format(booking.appointmentAt, "dd/MM/yyyy HH:mm")}</p>
+                    <p className="text-sm text-stone-500">{booking.customer.name} · {formatDateShort(booking.appointmentAt)}</p>
                   </div>
                   <span className="text-sm text-stone-700">{statusLabel(booking.status)}</span>
                 </div>
@@ -380,7 +367,7 @@ export default async function DashboardPage({
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="font-medium text-stone-900">{booking.service.name}</p>
-                <p className="text-sm text-stone-500">{format(booking.appointmentAt, "dd/MM/yyyy HH:mm")}</p>
+                <p className="text-sm text-stone-500">{formatDateShort(booking.appointmentAt)}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-stone-500">Estado</p>
