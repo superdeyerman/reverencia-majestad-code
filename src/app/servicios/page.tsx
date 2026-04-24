@@ -204,15 +204,14 @@ export default async function ServiciosPage() {
             Diseñamos experiencias personalizadas para clientes particulares, suites privadas y eventos corporativos.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button variant="gold" size="lg" asChild>
-              <a
-                href={`https://wa.me/56963929354?text=${encodeURIComponent('Hola, quiero una experiencia personalizada')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                WhatsApp directo
-              </a>
-            </Button>
+            <a
+              href={`https://wa.me/56963929354?text=${encodeURIComponent('Hola, quiero una experiencia personalizada')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-12 items-center justify-center rounded-sm bg-gold px-7 text-base font-sans font-medium tracking-wide text-white transition-all duration-150 hover:bg-gold-dark active:scale-[0.98]"
+            >
+              WhatsApp directo
+            </a>
             <Button variant="outline" size="lg" className="border-white/20 text-white hover:border-gold hover:text-gold" asChild>
               <Link href="/estilo">Diagnóstico AI gratuito</Link>
             </Button>
