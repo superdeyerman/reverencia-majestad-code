@@ -34,6 +34,9 @@ const categoryLabel: Record<ServiceCategory, string> = {
   BEAUTY: "Hair & Beauty",
   WELLNESS: "Wellness",
   SKINCARE: "Skincare",
+  NAILS: "Nails & Manicura",
+  MAKEUP: "Maquillaje",
+  BODY_TREATMENTS: "Tratamientos Corporales",
 };
 
 type ForWhom = "self" | "couple" | "mother" | "reduced" | "gift";

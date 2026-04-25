@@ -110,14 +110,14 @@ async function main() {
     },
   });
 
-  const beautyServices = await prisma.service.findMany({
-    where: { category: { in: ["BEAUTY", "SKINCARE"] } },
+  const stylistServices = await prisma.service.findMany({
+    where: { category: { in: ["BEAUTY", "NAILS", "MAKEUP"] } },
   });
-  const wellnessServices = await prisma.service.findMany({
-    where: { category: { in: ["WELLNESS", "SKINCARE"] } },
+  const therapistServices = await prisma.service.findMany({
+    where: { category: { in: ["WELLNESS", "SKINCARE", "BODY_TREATMENTS"] } },
   });
 
-  for (const service of beautyServices) {
+  for (const service of stylistServices) {
     await prisma.professionalService.upsert({
       where: {
         professionalId_serviceId: {
@@ -133,7 +133,7 @@ async function main() {
     });
   }
 
-  for (const service of wellnessServices) {
+  for (const service of therapistServices) {
     await prisma.professionalService.upsert({
       where: {
         professionalId_serviceId: {
@@ -188,6 +188,36 @@ async function main() {
     },
   });
 
+  await prisma.hotelPartner.upsert({
+    where: { email: "spa@magnoliahotel.cl" },
+    update: {},
+    create: {
+      name: "Hotel Magnolia",
+      contactName: "Director de Spa",
+      email: "spa@magnoliahotel.cl",
+      phone: "+56225561234",
+      address: "Av. Santa María 1742, Providencia, Santiago",
+      district: "Providencia",
+      commissionRate: 0.14,
+      notes: "Alianza premium para huéspedes VIP y paquetes in-room.",
+    },
+  });
+
+  await prisma.hotelPartner.upsert({
+    where: { email: "concierge@ritz-carlton.cl" },
+    update: {},
+    create: {
+      name: "The Ritz-Carlton Santiago",
+      contactName: "Head Concierge",
+      email: "concierge@ritz-carlton.cl",
+      phone: "+56225509500",
+      address: "El Alcalde 15, Las Condes, Santiago",
+      district: "Las Condes",
+      commissionRate: 0.15,
+      notes: "Hotel cinco estrellas. Servicios in-room exclusivos para huéspedes.",
+    },
+  });
+
   await prisma.testimonial.createMany({
     data: [
       {
@@ -199,6 +229,30 @@ async function main() {
       {
         clientName: "Valentina Guzmán",
         text: "El nivel de servicio a domicilio superó por mucho lo que esperaba de una experiencia premium.",
+        rating: 5,
+        isActive: true,
+      },
+      {
+        clientName: "Camila R.",
+        text: "El masaje prenatal fue una experiencia increíble. Profesional preparada, técnica impecable y muchísima calidez.",
+        rating: 5,
+        isActive: true,
+      },
+      {
+        clientName: "Daniela S.",
+        text: "El ritual de pareja en el hotel fue el mejor regalo de aniversario. Todo pensado al detalle.",
+        rating: 5,
+        isActive: true,
+      },
+      {
+        clientName: "Constanza M.",
+        text: "El maquillaje nupcial superó mis expectativas. Duró toda la noche y se veía perfecto en las fotos.",
+        rating: 5,
+        isActive: true,
+      },
+      {
+        clientName: "Guest Relations · Hotel Magnolia",
+        text: "La percepción de nuestros huéspedes subió notablemente desde que incorporamos Reverencia Majestad al concierge.",
         rating: 5,
         isActive: true,
       },
