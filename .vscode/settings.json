@@ -25,5 +25,6 @@
         "notebookOutputEditor": true,
         "workbench.editor.browser": true,
         "agentSessionsWelcomePage": true
-    }
+    },
+    "terminal.integrated.sendKeybindingsToShell": true
 }
