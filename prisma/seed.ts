@@ -292,38 +292,43 @@ async function main() {
     where: { slug: "signature-color" },
   });
 
-  const booking = await prisma.booking.create({
-    data: {
-      code: "RM-SEED01",
-      customerId: customer.id,
-      professionalId: stylistUser.id,
-      serviceId: signatureColor.id,
-      hotelPartnerId: hotel.id,
-      status: "CONFIRMED",
-      modality: BookingModality.HOTEL,
-      appointmentAt: new Date("2026-05-10T16:00:00-04:00"),
-      address: hotel.address,
-      district: hotel.district,
-      hotelName: hotel.name,
-      roomNumber: "1204",
-      hairLength: HairLength.LONG,
-      hairDensity: HairDensity.ABUNDANT,
-      subtotal: 89000,
-      surchargeLength: 6000,
-      surchargeAbundance: 4000,
-      surchargeDomicile: 12000,
-      totalAmount: 101000,
-      depositAmount: 30300,
-      balanceAmount: 70700,
-      paidAmountTotal: 30300,
-      isDepositPaid: true,
-      paidAt: new Date("2026-04-20T12:30:00-04:00"),
-      paymentProvider: PaymentProvider.MERCADO_PAGO,
-    },
+  const bookingData = {
+    customerId: customer.id,
+    professionalId: stylistUser.id,
+    serviceId: signatureColor.id,
+    hotelPartnerId: hotel.id,
+    status: "CONFIRMED" as const,
+    modality: BookingModality.HOTEL,
+    appointmentAt: new Date("2026-05-10T16:00:00-04:00"),
+    address: hotel.address,
+    district: hotel.district,
+    hotelName: hotel.name,
+    roomNumber: "1204",
+    hairLength: HairLength.LONG,
+    hairDensity: HairDensity.ABUNDANT,
+    subtotal: 89000,
+    surchargeLength: 6000,
+    surchargeAbundance: 4000,
+    surchargeDomicile: 12000,
+    totalAmount: 101000,
+    depositAmount: 30300,
+    balanceAmount: 70700,
+    paidAmountTotal: 30300,
+    isDepositPaid: true,
+    paidAt: new Date("2026-04-20T12:30:00-04:00"),
+    paymentProvider: PaymentProvider.MERCADO_PAGO,
+  };
+
+  const booking = await prisma.booking.upsert({
+    where: { code: "RM-SEED01" },
+    update: bookingData,
+    create: { code: "RM-SEED01", ...bookingData },
   });
 
-  await prisma.payment.create({
-    data: {
+  await prisma.payment.upsert({
+    where: { providerPaymentId: "seed-payment-approved-1" },
+    update: {},
+    create: {
       bookingId: booking.id,
       provider: PaymentProvider.MERCADO_PAGO,
       type: PaymentType.DEPOSIT,
@@ -337,8 +342,13 @@ async function main() {
     },
   });
 
-  await prisma.notification.create({
-    data: {
+  await prisma.notification.upsert({
+    where: {
+      id: `seed-notification-${customer.id}`,
+    },
+    update: {},
+    create: {
+      id: `seed-notification-${customer.id}`,
       userId: customer.id,
       channel: NotificationChannel.IN_APP,
       type: NotificationType.BOOKING_CONFIRMED,
