@@ -12,6 +12,7 @@
 - [ ] Fase 3: Conexión real de datos/funciones
   - [ ] Marketplace desde Prisma Service + filtros + disponibilidad + selección múltiple + modal detalle
   - [ ] Reservas reales paso a paso con variables, modalidad, calendario, matching profesional, resumen, abono, confirmación
+    - [ ] Bloque A (en progreso): BookingWizard premium multi-servicio + carrito lateral + descuentos 5/10/15 + selector "para quién" (sin romper contrato actual de API)
   - [ ] Admin real (dashboard, métricas, kanban, CRM, profesionales, hoteles, automatizaciones, expansión)
   - [ ] B2B hoteles (formulario y leads en /api/hotel-leads + panel admin hoteles)
   - [ ] Portal profesional (agenda, reservas, ganancias, disponibilidad)
