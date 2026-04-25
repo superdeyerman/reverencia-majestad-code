@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling / artefactos locales (no versionar)
+.vscode/
+.claude/
+.idea/
+gh.exe
+*.exe
