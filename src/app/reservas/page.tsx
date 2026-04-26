@@ -37,7 +37,14 @@ const reassuranceBlocks = [
   },
 ];
 
-export default async function ReservasPage() {
+export default async function ReservasPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  const params = await searchParams;
+  const preselectedSlug = params.servicio ?? null;
+
   const services = await prisma.service.findMany({
     where: { isActive: true },
     orderBy: [{ isFeatured: 'desc' }, { category: 'asc' }, { basePrice: 'asc' }],
@@ -143,7 +150,7 @@ export default async function ReservasPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-14 lg:px-10">
-        <BookingWizard services={services} />
+        <BookingWizard services={services} preselectedSlug={preselectedSlug} />
       </section>
 
       <section className="border-t border-stone-200 bg-white py-20">

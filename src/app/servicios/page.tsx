@@ -31,6 +31,18 @@ const CATEGORY_LABELS: Record<string, { label: string; description: string }> = 
     label: 'Skincare',
     description: 'Tratamientos faciales con cosmética dermofarmacéutica de primera línea.',
   },
+  NAILS: {
+    label: 'Nails & Manicura',
+    description: 'Manicura, pedicura, gel y nail art editorial a domicilio o en hotel.',
+  },
+  MAKEUP: {
+    label: 'Maquillaje',
+    description: 'Maquillaje profesional para eventos, bodas y sesiones. Acabado editorial y duración garantizada.',
+  },
+  BODY_TREATMENTS: {
+    label: 'Tratamientos Corporales',
+    description: 'Exfoliaciones, envolturas y rituales detox para renovar la piel de pies a cabeza.',
+  },
 };
 
 const MODALITY_ICONS = {

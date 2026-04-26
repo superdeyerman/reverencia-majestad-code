@@ -57,7 +57,13 @@ const suggestionByProfile: Record<ForWhom, string[]> = {
   gift: ["Gift experience premium", "Ritual sorpresa", "Pack deluxe"],
 };
 
-export default function BookingWizard({ services }: { services: ServiceOption[] }) {
+export default function BookingWizard({
+  services,
+  preselectedSlug,
+}: {
+  services: ServiceOption[];
+  preselectedSlug?: string | null;
+}) {
   const state = useBookingWizardStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +71,22 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
   const deferredSearch = useDeferredValue(search);
   const [slots, setSlots] = useState<Array<{ slot: string; available: boolean; professionals: number }>>([]);
   const [forWhom, setForWhom] = useState<ForWhom>("self");
-  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
+
+  const initialIds = useMemo(() => {
+    if (!preselectedSlug) return [];
+    const match = services.find((s) => s.slug === preselectedSlug);
+    return match ? [match.id] : [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(initialIds);
+
+  useEffect(() => {
+    if (initialIds.length > 0) {
+      state.patch({ serviceId: initialIds[0] ?? null });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedService = useMemo(
     () => services.find((service) => service.id === state.serviceId) ?? null,

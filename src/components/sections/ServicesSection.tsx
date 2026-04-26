@@ -1,124 +1,110 @@
 import Link from 'next/link';
-import { Scissors, Palette, Hand, Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, Scissors, Hand, Sparkles, Palette, Waves } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Card, CardHeader, Badge, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { formatCLP, formatDuration } from '@/lib/utils';
 
-interface Service {
+export interface FeaturedService {
   id: string;
-  icon: LucideIcon;
+  slug: string;
   name: string;
+  category: string;
   description: string;
-  price: string;
-  duration: string;
-  popular?: boolean;
+  basePrice: number;
+  durationMinutes: number;
+  isFeatured: boolean;
 }
 
-const services: Service[] = [
-  {
-    id: 'corte',
-    icon: Scissors,
-    name: 'Corte & Styling',
-    description: 'Corte personalizado, lavado y peinado profesional adaptado a tu tipo de cabello.',
-    price: 'Desde $25.000',
-    duration: '60 min',
-  },
-  {
-    id: 'colorimetria',
-    icon: Palette,
-    name: 'Colorimetría',
-    description: 'Coloración, mechas y técnicas de balayage con productos de primera línea sin daño.',
-    price: 'Desde $55.000',
-    duration: '120 min',
-    popular: true,
-  },
-  {
-    id: 'masaje',
-    icon: Hand,
-    name: 'Masaje Relajante',
-    description: 'Masaje sueco o de tejido profundo para liberar tensiones en la comodidad de tu hogar.',
-    price: 'Desde $35.000',
-    duration: '60 min',
-  },
-  {
-    id: 'facial',
-    icon: Sparkles,
-    name: 'Tratamiento Facial',
-    description: 'Limpieza profunda, hidratación y revitalización con cosmética dermofarmacéutica.',
-    price: 'Desde $40.000',
-    duration: '75 min',
-  },
-];
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  BEAUTY: Scissors,
+  WELLNESS: Hand,
+  SKINCARE: Sparkles,
+  NAILS: Scissors,
+  MAKEUP: Palette,
+  BODY_TREATMENTS: Waves,
+};
 
-export default function ServicesSection() {
+const CATEGORY_LABELS: Record<string, string> = {
+  BEAUTY: 'Hair & Beauty',
+  WELLNESS: 'Wellness',
+  SKINCARE: 'Skincare',
+  NAILS: 'Nails',
+  MAKEUP: 'Maquillaje',
+  BODY_TREATMENTS: 'Cuerpo',
+};
+
+export default function ServicesSection({ services }: { services: FeaturedService[] }) {
   return (
     <section id="servicios" className="bg-white py-24">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
 
-        {/* Header */}
         <div className="max-w-xl mb-14">
-          <span className="inline-flex items-center gap-2 text-xs font-sans font-medium tracking-widest text-gold uppercase mb-4">
-            <span className="h-px w-8 bg-gold" />
+          <span className="inline-flex items-center gap-2 text-xs font-medium tracking-widest text-[#b98f53] uppercase mb-4">
+            <span className="h-px w-8 bg-[#c9a96e]" />
             Nuestros Servicios
           </span>
-          <h2 className="font-serif text-4xl lg:text-5xl text-char leading-tight mb-4">
+          <h2 className="font-serif text-4xl lg:text-5xl text-stone-950 leading-tight mb-4">
             Experiencias diseñadas para ti
           </h2>
-          <p className="font-sans text-sm text-gray leading-relaxed">
+          <p className="text-sm text-stone-600 leading-relaxed">
             Cada servicio incluye productos premium, profesionales certificados y la
             comodidad de tu propio espacio.
           </p>
         </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {services.map((s) => {
-            const Icon = s.icon;
+          {services.map((service) => {
+            const Icon = CATEGORY_ICONS[service.category] ?? Sparkles;
+            const categoryLabel = CATEGORY_LABELS[service.category] ?? service.category;
+
             return (
-              <Card
-                key={s.id}
-                hoverable
-                padding="md"
-                className="relative flex flex-col"
+              <article
+                key={service.id}
+                className="relative flex flex-col rounded-[1.8rem] border border-stone-200 bg-[#faf7f2] p-6 shadow-[0_14px_40px_rgba(63,47,36,0.05)] hover:shadow-[0_20px_60px_rgba(63,47,36,0.10)] transition-shadow"
               >
-                {s.popular && (
-                  <span className="absolute -top-3 left-4">
-                    <Badge status="vip" label="Popular" size="sm" />
+                {service.isFeatured && (
+                  <span className="absolute -top-3 left-5 inline-flex items-center gap-1 rounded-full border border-[#c9a96e]/30 bg-white px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[#b98f53]">
+                    <Sparkles size={9} aria-hidden="true" /> Destacado
                   </span>
                 )}
 
-                {/* Icon */}
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-sm bg-gold/10">
-                  <Icon size={20} className="text-gold" />
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#b98f53] shadow-sm">
+                  <Icon size={18} aria-hidden="true" />
                 </div>
 
-                <CardHeader
-                  title={s.name}
-                  subtitle={s.duration}
-                  className="mb-3"
-                />
-
-                <p className="font-sans text-sm text-gray leading-relaxed flex-1 mb-5">
-                  {s.description}
+                <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#b98f53] mb-2">
+                  {categoryLabel}
                 </p>
 
-                <div className="flex items-center justify-between pt-4 border-t border-border">
-                  <span className="font-serif text-base font-medium text-char">
-                    {s.price}
-                  </span>
+                <h3 className="font-serif text-xl text-stone-950 leading-snug mb-3">
+                  {service.name}
+                </h3>
+
+                <p className="text-sm text-stone-600 leading-relaxed flex-1 mb-5 line-clamp-3">
+                  {service.description}
+                </p>
+
+                <div className="flex items-center justify-between border-t border-stone-200 pt-4">
+                  <div>
+                    <p className="font-serif text-xl text-stone-950">{formatCLP(service.basePrice)}</p>
+                    <p className="flex items-center gap-1 text-[11px] text-stone-500 mt-0.5">
+                      <Clock size={11} aria-hidden="true" />
+                      {formatDuration(service.durationMinutes)}
+                    </p>
+                  </div>
                   <Link
-                    href={`/reservar?servicio=${s.id}`}
-                    aria-label={`Reservar ${s.name}`}
-                    className="text-xs font-sans font-medium text-gold hover:text-gold-dark inline-flex items-center gap-1 transition-colors"
+                    href={`/reservar?servicio=${service.slug}`}
+                    aria-label={`Reservar ${service.name}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition-colors hover:border-[#c9a96e] hover:text-[#b98f53]"
                   >
                     Reservar <ArrowRight size={12} aria-hidden="true" />
                   </Link>
                 </div>
-              </Card>
+              </article>
             );
           })}
         </div>
 
-        {/* CTA */}
         <div className="mt-12 text-center">
           <Button variant="outline" size="md" asChild>
             <Link href="/servicios">Ver todos los servicios</Link>

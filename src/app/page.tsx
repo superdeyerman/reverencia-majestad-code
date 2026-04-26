@@ -17,6 +17,9 @@ import TrustSection from '@/components/sections/TrustSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import CTASection from '@/components/sections/CTASection';
 import { Button } from '@/components/ui';
+import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Reverencia Majestad · Luxury Hair & Spa Mobile Santiago',
@@ -110,14 +113,30 @@ const testimonials = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredServices = await prisma.service.findMany({
+    where: { isActive: true, isFeatured: true },
+    orderBy: [{ category: 'asc' }, { basePrice: 'asc' }],
+    take: 8,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      category: true,
+      description: true,
+      basePrice: true,
+      durationMinutes: true,
+      isFeatured: true,
+    },
+  });
+
   return (
     <main className="bg-[#f8f4ed]">
       <HeroSection />
 
       <TrustSection />
 
-      <ServicesSection />
+      <ServicesSection services={featuredServices} />
 
       <section className="border-y border-stone-200 bg-white py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
