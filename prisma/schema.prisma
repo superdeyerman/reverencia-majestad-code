@@ -27,6 +27,9 @@ enum ServiceCategory {
   BEAUTY
   WELLNESS
   SKINCARE
+  NAILS
+  MAKEUP
+  BODY_TREATMENTS
 }
 
 enum BookingStatus {
@@ -134,6 +137,8 @@ enum PaymentType {
   DEPOSIT
   FULL
   BALANCE
+  REFUND
+  ADJUSTMENT
 }
 
 model User {

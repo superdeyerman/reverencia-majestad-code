@@ -15,8 +15,15 @@ import {
 import HeroSection from '@/components/sections/HeroSection';
 import TrustSection from '@/components/sections/TrustSection';
 import ServicesSection from '@/components/sections/ServicesSection';
+import DiscountLadderSection from '@/components/sections/DiscountLadderSection';
+import PackagesSection from '@/components/sections/PackagesSection';
+import HotelExperiencesSection from '@/components/sections/HotelExperiencesSection';
+import FounderSection from '@/components/sections/FounderSection';
 import CTASection from '@/components/sections/CTASection';
 import { Button } from '@/components/ui';
+import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Reverencia Majestad · Luxury Hair & Spa Mobile Santiago',
@@ -110,14 +117,30 @@ const testimonials = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const featuredServices = await prisma.service.findMany({
+    where: { isActive: true, isFeatured: true },
+    orderBy: [{ category: 'asc' }, { basePrice: 'asc' }],
+    take: 8,
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      category: true,
+      description: true,
+      basePrice: true,
+      durationMinutes: true,
+      isFeatured: true,
+    },
+  });
+
   return (
     <main className="bg-[#f8f4ed]">
       <HeroSection />
 
       <TrustSection />
 
-      <ServicesSection />
+      <ServicesSection services={featuredServices} />
 
       <section className="border-y border-stone-200 bg-white py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
@@ -153,6 +176,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <DiscountLadderSection />
 
       <section className="bg-[#f8f4ed] py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
@@ -259,6 +284,10 @@ export default function HomePage() {
         </div>
       </section>
 
+      <PackagesSection />
+
+      <HotelExperiencesSection />
+
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
@@ -333,6 +362,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <FounderSection />
 
       <section className="bg-[#f8f4ed] py-20">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-6 sm:flex-row sm:items-center lg:px-12">

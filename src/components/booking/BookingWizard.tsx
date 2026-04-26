@@ -2,6 +2,7 @@
 
 import { startTransition, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { BookingModality, HairDensity, HairLength, ServiceCategory } from "@prisma/client";
+import { Sparkles, User, Heart, Baby, Accessibility, Gift } from "lucide-react";
 import { useBookingWizardStore } from "@/store/booking-wizard";
 import { calculateBookingPricing } from "@/lib/pricing";
 import { formatCLP, formatDuration } from "@/lib/utils";
@@ -33,15 +34,59 @@ const categoryLabel: Record<ServiceCategory, string> = {
   BEAUTY: "Hair & Beauty",
   WELLNESS: "Wellness",
   SKINCARE: "Skincare",
+  NAILS: "Nails & Manicura",
+  MAKEUP: "Maquillaje",
+  BODY_TREATMENTS: "Tratamientos Corporales",
 };
 
-export default function BookingWizard({ services }: { services: ServiceOption[] }) {
+type ForWhom = "self" | "couple" | "mother" | "reduced" | "gift";
+
+const forWhomOptions: Array<{ value: ForWhom; label: string; icon: typeof User }> = [
+  { value: "self", label: "Para mí", icon: User },
+  { value: "couple", label: "Pareja", icon: Heart },
+  { value: "mother", label: "Madre reciente", icon: Baby },
+  { value: "reduced", label: "Movilidad reducida", icon: Accessibility },
+  { value: "gift", label: "Regalo", icon: Gift },
+];
+
+const suggestionByProfile: Record<ForWhom, string[]> = {
+  self: ["Masaje Relajante · Ideal para hoy", "Skin ritual express", "Hair gloss + peinado"],
+  couple: ["Spa parejas", "Ritual romance en hotel", "Chef privado + wellness"],
+  mother: ["Postparto delicado", "Masaje reconfortante", "Skincare calmante"],
+  reduced: ["Atención adaptada domicilio", "Wellness suave", "Protocolo accesible"],
+  gift: ["Gift experience premium", "Ritual sorpresa", "Pack deluxe"],
+};
+
+export default function BookingWizard({
+  services,
+  preselectedSlug,
+}: {
+  services: ServiceOption[];
+  preselectedSlug?: string | null;
+}) {
   const state = useBookingWizardStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [slots, setSlots] = useState<Array<{ slot: string; available: boolean; professionals: number }>>([]);
+  const [forWhom, setForWhom] = useState<ForWhom>("self");
+
+  const initialIds = useMemo(() => {
+    if (!preselectedSlug) return [];
+    const match = services.find((s) => s.slug === preselectedSlug);
+    return match ? [match.id] : [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(initialIds);
+
+  useEffect(() => {
+    if (initialIds.length > 0) {
+      state.patch({ serviceId: initialIds[0] ?? null });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedService = useMemo(
     () => services.find((service) => service.id === state.serviceId) ?? null,
@@ -61,6 +106,33 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
   }, [deferredSearch, services]);
 
   const visibleSlots = selectedService && state.date ? slots : [];
+
+  const selectedServices = useMemo(
+    () => services.filter((service) => selectedServiceIds.includes(service.id)),
+    [services, selectedServiceIds],
+  );
+
+  const multiSubtotal = useMemo(
+    () => selectedServices.reduce((acc, service) => acc + service.basePrice, 0),
+    [selectedServices],
+  );
+
+  const multiDiscountPct = useMemo(() => {
+    if (selectedServices.length >= 4) return 15;
+    if (selectedServices.length === 3) return 10;
+    if (selectedServices.length === 2) return 5;
+    return 0;
+  }, [selectedServices.length]);
+
+  const multiDiscountAmount = useMemo(
+    () => Math.round((multiSubtotal * multiDiscountPct) / 100),
+    [multiSubtotal, multiDiscountPct],
+  );
+
+  const multiTotal = useMemo(
+    () => Math.max(0, multiSubtotal - multiDiscountAmount),
+    [multiSubtotal, multiDiscountAmount],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -102,7 +174,7 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
   const canAdvance = useMemo(() => {
     switch (state.step) {
       case 1:
-        return Boolean(selectedService);
+        return selectedServiceIds.length > 0;
       case 2:
         return Boolean(selectedService);
       case 3:
@@ -184,6 +256,18 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
     }
   }
 
+  function toggleService(serviceId: string) {
+    setSelectedServiceIds((prev) => {
+      const exists = prev.includes(serviceId);
+      const next = exists ? prev.filter((id) => id !== serviceId) : [...prev, serviceId];
+
+      const primaryServiceId = next[0] ?? null;
+      state.patch({ serviceId: primaryServiceId });
+
+      return next;
+    });
+  }
+
   function nextStep() {
     if (!canAdvance || state.step >= 6) return;
     startTransition(() => state.setStep((state.step + 1) as 2 | 3 | 4 | 5 | 6));
@@ -224,10 +308,51 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
           <div className="space-y-6">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-[#9e7a3f]">Paso 1</p>
-              <h2 className="mt-2 font-serif text-4xl text-stone-950">Elige tu experiencia</h2>
+              <h2 className="mt-2 font-serif text-4xl text-stone-950">Elige tus experiencias</h2>
               <p className="mt-2 max-w-2xl text-sm leading-7 text-stone-500">
-                Convertimos el catálogo premium en una selección operable en tiempo real. Cada servicio está conectado a pricing, disponibilidad y checkout.
+                Selección multi-servicio premium con descuento progresivo: 2 servicios −5%, 3 servicios −10%, 4+ servicios −15%.
               </p>
+            </div>
+
+            <div className="rounded-3xl border border-stone-200 bg-[#faf7f2] p-4">
+              <p className="mb-3 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-[#9e7a3f]">
+                <Sparkles size={14} />
+                ¿Para quién es esta experiencia?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {forWhomOptions.map((option) => {
+                  const Icon = option.icon;
+                  const active = forWhom === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setForWhom(option.value)}
+                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs transition ${
+                        active
+                          ? "border-stone-950 bg-stone-950 text-white"
+                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-400"
+                      }`}
+                    >
+                      <Icon size={14} />
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 rounded-2xl border border-[#e8d5b0] bg-white px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-[#9e7a3f]">Sugerencias IA</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {suggestionByProfile[forWhom].map((suggestion) => (
+                    <span
+                      key={suggestion}
+                      className="rounded-full border border-stone-200 bg-[#faf7f2] px-3 py-1 text-xs text-stone-700"
+                    >
+                      {suggestion}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <input
@@ -239,12 +364,12 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
 
             <div className="grid gap-4 md:grid-cols-2">
               {filteredServices.map((service) => {
-                const selected = service.id === state.serviceId;
+                const selected = selectedServiceIds.includes(service.id);
                 return (
                   <button
                     key={service.id}
                     type="button"
-                    onClick={() => state.patch({ serviceId: service.id })}
+                    onClick={() => toggleService(service.id)}
                     className={`rounded-3xl border p-5 text-left transition ${
                       selected ? "border-[#c9a96e] bg-[#faf7f2]" : "border-stone-200 bg-white hover:border-stone-400"
                     }`}
@@ -261,7 +386,7 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
                     <p className="text-sm leading-7 text-stone-500">{service.description}</p>
                     <div className="mt-4 flex items-center justify-between text-sm">
                       <span className="font-medium text-stone-950">{formatCLP(service.basePrice)}</span>
-                      <span className="text-stone-400">{service.isFeatured ? "Destacado" : "Disponible"}</span>
+                      <span className="text-stone-400">{selected ? "Añadido" : service.isFeatured ? "Destacado" : "Disponible"}</span>
                     </div>
                   </button>
                 );
@@ -565,26 +690,53 @@ export default function BookingWizard({ services }: { services: ServiceOption[] 
       </section>
 
       <aside className="h-fit rounded-[2rem] border border-stone-200 bg-stone-950 p-8 text-white lg:sticky lg:top-24">
-        <p className="text-xs uppercase tracking-[0.35em] text-[#c9a96e]">Resumen vivo</p>
-        <h3 className="mt-3 font-serif text-3xl">{selectedService?.name ?? "Selecciona un servicio"}</h3>
+        <p className="text-xs uppercase tracking-[0.35em] text-[#c9a96e]">Tu selección</p>
+        <h3 className="mt-3 font-serif text-3xl">
+          {selectedServices.length > 0 ? `${selectedServices.length} servicio(s)` : "Selecciona servicios"}
+        </h3>
         <p className="mt-4 text-sm leading-7 text-stone-300">
-          El panel lateral refleja pricing, modalidad y depósito usando las reglas del backend.
+          Carrito lateral premium conectado al flujo real. Mantiene contrato actual de backend mientras habilita experiencia multi-servicio.
         </p>
-        <div className="mt-8 space-y-3 text-sm">
+
+        <div className="mt-6 space-y-2">
+          {selectedServices.length === 0 ? (
+            <p className="text-sm text-stone-400">Aún no has añadido servicios.</p>
+          ) : (
+            selectedServices.map((service) => (
+              <div key={service.id} className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{service.name}</p>
+                    <p className="text-xs text-stone-400">{categoryLabel[service.category]}</p>
+                  </div>
+                  <span className="text-[#e8d5b0]">{formatCLP(service.basePrice)}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="mt-8 space-y-3 border-t border-white/10 pt-5 text-sm">
           <div className="flex justify-between">
-            <span className="text-stone-400">Categoría</span>
-            <span>{selectedService ? categoryLabel[selectedService.category] : "—"}</span>
+            <span className="text-stone-400">Subtotal</span>
+            <span>{formatCLP(multiSubtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-stone-400">Duración</span>
-            <span>{selectedService ? formatDuration(selectedService.durationMinutes) : "—"}</span>
+            <span className="text-stone-400">Descuento</span>
+            <span className="text-green-300">
+              {multiDiscountPct > 0 ? `-${multiDiscountPct}% (${formatCLP(multiDiscountAmount)})` : "—"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-stone-400">Total carrito</span>
+            <span>{formatCLP(multiTotal)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-stone-400">Modalidad</span>
             <span>{state.modality}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-stone-400">Total</span>
+            <span className="text-stone-400">Total backend</span>
             <span>{pricing ? formatCLP(pricing.totalAmount) : "—"}</span>
           </div>
           <div className="flex justify-between">
