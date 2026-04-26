@@ -15,6 +15,10 @@ import {
 import HeroSection from '@/components/sections/HeroSection';
 import TrustSection from '@/components/sections/TrustSection';
 import ServicesSection from '@/components/sections/ServicesSection';
+import DiscountLadderSection from '@/components/sections/DiscountLadderSection';
+import PackagesSection from '@/components/sections/PackagesSection';
+import HotelExperiencesSection from '@/components/sections/HotelExperiencesSection';
+import FounderSection from '@/components/sections/FounderSection';
 import CTASection from '@/components/sections/CTASection';
 import { Button } from '@/components/ui';
 
@@ -119,6 +123,8 @@ export default function HomePage() {
 
       <ServicesSection />
 
+      <DiscountLadderSection />
+
       <section className="border-y border-stone-200 bg-white py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
           <div className="mb-14 max-w-2xl">
@@ -153,6 +159,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PackagesSection />
 
       <section className="bg-[#f8f4ed] py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
@@ -259,6 +267,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <HotelExperiencesSection />
+
       <section className="mx-auto max-w-7xl px-6 py-24 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
@@ -288,6 +298,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <FounderSection />
 
       <section className="border-y border-stone-200 bg-white py-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
