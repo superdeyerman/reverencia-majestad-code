@@ -9,6 +9,9 @@ JWT_SECRET=replace-with-a-long-random-secret
 NEXTAUTH_URL=https://reverencia-majestad.vercel.app
 APP_URL=https://reverencia-majestad.vercel.app
 MERCADOPAGO_ACCESS_TOKEN=APP_USR-...
+MERCADOPAGO_PUBLIC_KEY=APP_USR-...
+MERCADOPAGO_CLIENT_ID=...
+MERCADOPAGO_CLIENT_SECRET=...
 MERCADOPAGO_WEBHOOK_SECRET=...
 RESEND_API_KEY=re_...
 RESEND_FROM=Reverencia Majestad <no-reply@reverenciamajestad.cl>
@@ -35,10 +38,11 @@ CRON_SECRET=replace-with-a-long-random-secret
 ### Mercado Pago
 
 1. Crear credenciales de producción y copiar `MERCADOPAGO_ACCESS_TOKEN`.
-2. Configurar webhook a:
+2. Si tu integración lo requiere, guardar también `MERCADOPAGO_PUBLIC_KEY`, `MERCADOPAGO_CLIENT_ID` y `MERCADOPAGO_CLIENT_SECRET` como variables de entorno (nunca hardcodear secretos en el repositorio).
+3. Configurar webhook a:
    `https://reverencia-majestad.vercel.app/api/payments/webhooks/mercadopago`
-3. Guardar el secreto en `MERCADOPAGO_WEBHOOK_SECRET`.
-4. Validar retorno:
+4. Guardar el secreto en `MERCADOPAGO_WEBHOOK_SECRET`.
+5. Validar retorno:
    `https://reverencia-majestad.vercel.app/checkout/success`
    `https://reverencia-majestad.vercel.app/checkout/failure`
    `https://reverencia-majestad.vercel.app/checkout/pending`

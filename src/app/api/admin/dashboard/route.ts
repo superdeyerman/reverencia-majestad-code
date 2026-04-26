@@ -72,7 +72,7 @@ export async function GET() {
       },
     }),
     prisma.user.findMany({
-      where:   { role: Role.CLIENT },
+      where:   { role: Role.CUSTOMER },
       orderBy: { createdAt: "desc" },
       take:    200,
       include: { customer: true },

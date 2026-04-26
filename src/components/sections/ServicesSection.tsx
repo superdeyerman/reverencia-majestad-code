@@ -1,88 +1,101 @@
 import Link from 'next/link';
-import { ArrowRight, Scissors, Palette, Hand, Sparkles, Flower2, Star } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
-import type { ServiceCategory } from '@prisma/client';
+import { ArrowRight, Clock, Scissors, Hand, Sparkles, Palette, Waves } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui';
+import { formatCLP, formatDuration } from '@/lib/utils';
 
-const CATEGORY_ICON: Record<ServiceCategory, typeof Scissors> = {
+export interface FeaturedService {
+  id: string;
+  slug: string;
+  name: string;
+  category: string;
+  description: string;
+  basePrice: number;
+  durationMinutes: number;
+  isFeatured: boolean;
+}
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
   BEAUTY: Scissors,
   WELLNESS: Hand,
   SKINCARE: Sparkles,
-  NAILS: Star,
+  NAILS: Scissors,
   MAKEUP: Palette,
-  BODY_TREATMENTS: Flower2,
+  BODY_TREATMENTS: Waves,
 };
 
-function formatCLP(cents: number) {
-  return new Intl.NumberFormat('es-CL', {
-    style: 'currency',
-    currency: 'CLP',
-    maximumFractionDigits: 0,
-  }).format(cents);
-}
+const CATEGORY_LABELS: Record<string, string> = {
+  BEAUTY: 'Hair & Beauty',
+  WELLNESS: 'Wellness',
+  SKINCARE: 'Skincare',
+  NAILS: 'Nails',
+  MAKEUP: 'Maquillaje',
+  BODY_TREATMENTS: 'Cuerpo',
+};
 
-export default async function ServicesSection() {
-  const services = await prisma.service.findMany({
-    where: { isActive: true, isFeatured: true },
-    orderBy: { basePrice: 'asc' },
-    take: 4,
-  });
-
-  const fallback = [
-    { id: 'corte', slug: 'corte-styling', name: 'Corte & Styling', description: 'Corte personalizado, lavado y peinado profesional adaptado a tu tipo de cabello.', basePrice: 25000, durationMinutes: 60, isFeatured: true, category: 'BEAUTY' as ServiceCategory },
-    { id: 'colorimetria', slug: 'colorimetria', name: 'Colorimetría', description: 'Coloración, mechas y técnicas de balayage con productos de primera línea sin daño.', basePrice: 55000, durationMinutes: 120, isFeatured: true, category: 'BEAUTY' as ServiceCategory },
-    { id: 'masaje', slug: 'masaje-relajante', name: 'Masaje Relajante', description: 'Masaje sueco o de tejido profundo para liberar tensiones en la comodidad de tu hogar.', basePrice: 35000, durationMinutes: 60, isFeatured: false, category: 'WELLNESS' as ServiceCategory },
-    { id: 'facial', slug: 'facial-glow', name: 'Tratamiento Facial', description: 'Limpieza profunda, hidratación y revitalización con cosmética dermofarmacéutica.', basePrice: 40000, durationMinutes: 75, isFeatured: false, category: 'SKINCARE' as ServiceCategory },
-  ];
-
-  const items = services.length > 0 ? services : fallback;
-
+export default function ServicesSection({ services }: { services: FeaturedService[] }) {
   return (
     <section id="servicios" className="bg-white py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-12">
-        <div className="mb-14 max-w-xl">
-          <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.32em] text-[#b98f53]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+
+        <div className="max-w-xl mb-14">
+          <span className="inline-flex items-center gap-2 text-xs font-medium tracking-widest text-[#b98f53] uppercase mb-4">
             <span className="h-px w-8 bg-[#c9a96e]" />
             Nuestros Servicios
           </span>
-          <h2 className="mt-4 font-serif text-4xl leading-tight text-stone-950 lg:text-5xl">
+          <h2 className="font-serif text-4xl lg:text-5xl text-stone-950 leading-tight mb-4">
             Experiencias diseñadas para ti
           </h2>
-          <p className="mt-4 text-sm leading-8 text-stone-600">
+          <p className="text-sm text-stone-600 leading-relaxed">
             Cada servicio incluye productos premium, profesionales certificados y la
             comodidad de tu propio espacio.
           </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((s) => {
-            const Icon = CATEGORY_ICON[s.category] ?? Scissors;
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {services.map((service) => {
+            const Icon = CATEGORY_ICONS[service.category] ?? Sparkles;
+            const categoryLabel = CATEGORY_LABELS[service.category] ?? service.category;
+
             return (
               <article
-                key={s.id}
-                className="relative flex flex-col rounded-[2rem] border border-stone-200 bg-[#faf7f2] p-7 shadow-[0_14px_40px_rgba(63,47,36,0.05)] transition-shadow hover:shadow-lg"
+                key={service.id}
+                className="relative flex flex-col rounded-[1.8rem] border border-stone-200 bg-[#faf7f2] p-6 shadow-[0_14px_40px_rgba(63,47,36,0.05)] hover:shadow-[0_20px_60px_rgba(63,47,36,0.10)] transition-shadow"
               >
-                {s.isFeatured && (
-                  <span className="absolute -top-3 left-6 inline-flex items-center rounded-full border border-[#c9a96e]/30 bg-white px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[#b98f53]">
-                    Popular
+                {service.isFeatured && (
+                  <span className="absolute -top-3 left-5 inline-flex items-center gap-1 rounded-full border border-[#c9a96e]/30 bg-white px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[#b98f53]">
+                    <Sparkles size={9} aria-hidden="true" /> Destacado
                   </span>
                 )}
 
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#c9a96e]/10">
-                  <Icon size={20} className="text-[#b98f53]" aria-hidden="true" />
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#b98f53] shadow-sm">
+                  <Icon size={18} aria-hidden="true" />
                 </div>
 
-                <h3 className="font-serif text-2xl text-stone-950">{s.name}</h3>
-                <p className="mt-1 text-xs text-stone-400">{s.durationMinutes} min</p>
-                <p className="mt-3 flex-1 text-sm leading-7 text-stone-600">{s.description}</p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#b98f53] mb-2">
+                  {categoryLabel}
+                </p>
 
-                <div className="mt-6 flex items-center justify-between border-t border-stone-200 pt-5">
-                  <span className="font-serif text-base text-stone-950">
-                    Desde {formatCLP(s.basePrice)}
-                  </span>
+                <h3 className="font-serif text-xl text-stone-950 leading-snug mb-3">
+                  {service.name}
+                </h3>
+
+                <p className="text-sm text-stone-600 leading-relaxed flex-1 mb-5 line-clamp-3">
+                  {service.description}
+                </p>
+
+                <div className="flex items-center justify-between border-t border-stone-200 pt-4">
+                  <div>
+                    <p className="font-serif text-xl text-stone-950">{formatCLP(service.basePrice)}</p>
+                    <p className="flex items-center gap-1 text-[11px] text-stone-500 mt-0.5">
+                      <Clock size={11} aria-hidden="true" />
+                      {formatDuration(service.durationMinutes)}
+                    </p>
+                  </div>
                   <Link
-                    href={`/reservar?servicio=${s.slug}`}
-                    aria-label={`Reservar ${s.name}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-[#b98f53] transition-colors hover:text-[#8e6b3d]"
+                    href={`/reservar?servicio=${service.slug}`}
+                    aria-label={`Reservar ${service.name}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-medium text-stone-700 transition-colors hover:border-[#c9a96e] hover:text-[#b98f53]"
                   >
                     Reservar <ArrowRight size={12} aria-hidden="true" />
                   </Link>
@@ -93,13 +106,11 @@ export default async function ServicesSection() {
         </div>
 
         <div className="mt-12 text-center">
-          <Link
-            href="/servicios"
-            className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-6 py-3 text-sm font-medium text-stone-700 transition hover:border-[#c9a96e] hover:text-[#b98f53]"
-          >
-            Ver todos los servicios <ArrowRight size={14} aria-hidden="true" />
-          </Link>
+          <Button variant="outline" size="md" asChild>
+            <Link href="/servicios">Ver todos los servicios</Link>
+          </Button>
         </div>
+
       </div>
     </section>
   );
