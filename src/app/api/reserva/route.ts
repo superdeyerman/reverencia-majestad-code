@@ -19,20 +19,6 @@ function getNumber(value: FormDataEntryValue | null): number {
   return Number.isFinite(number) ? number : 0;
 }
 
-function buildRedirectUrl(path: string): string {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.VERCEL_URL ||
-    "http://localhost:3000";
-
-  const normalizedBaseUrl = baseUrl.startsWith("http")
-    ? baseUrl
-    : `https://${baseUrl}`;
-
-  return `${normalizedBaseUrl}${path}`;
-}
-
 function generateBookingCode(): string {
   const datePart = new Date()
     .toISOString()
@@ -307,8 +293,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.redirect(
-      buildRedirectUrl(`/checkout?reserva=${booking.id}`),
-      303
+     new URL(`/checkout?reserva=${booking.id}`, req.url),
+     303
     );
   } catch (error) {
     console.error("ERROR_CREANDO_RESERVA:", error);
