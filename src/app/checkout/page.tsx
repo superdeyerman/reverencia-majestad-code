@@ -8,9 +8,12 @@ export const dynamic = "force-dynamic";
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: { reserva?: string };
+  searchParams: Promise<{ reserva?: string | string[] }>;
 }) {
-  const reservaId = searchParams.reserva;
+  const params = await searchParams;
+
+  const reservaId =
+    typeof params.reserva === "string" ? params.reserva : null;
 
   if (!reservaId) {
     return (
@@ -25,7 +28,7 @@ export default async function CheckoutPage({
           </p>
 
           <Link
-            href="/reservar"
+            href="/reserva"
             className="inline-block rounded-xl bg-char px-6 py-4 text-white"
           >
             Volver a reservar
@@ -52,18 +55,21 @@ export default async function CheckoutPage({
             Reserva no encontrada
           </h1>
 
+          <p className="text-sm text-gray mb-6">
+            No se encontró la reserva solicitada.
+          </p>
+
           <Link
-            href="/reservar"
+            href="/reserva"
             className="inline-block rounded-xl bg-char px-6 py-4 text-white"
           >
-            Volver
+            Volver a reservar
           </Link>
         </section>
       </main>
     );
   }
 
-  // 🔥 Protección mínima por si viene raro desde DB
   const subtotal = booking.subtotal ?? 0;
   const discount = booking.discount ?? 0;
   const total = Math.max(booking.totalAmount ?? 0, 0);
@@ -72,7 +78,6 @@ export default async function CheckoutPage({
   return (
     <main className="min-h-screen bg-cream px-6 py-20">
       <section className="mx-auto max-w-6xl grid lg:grid-cols-[1.2fr_420px] gap-12">
-
         {/* RESUMEN */}
         <div className="rounded-3xl border border-stone-200 bg-white p-10 shadow-sm">
           <h1 className="text-4xl font-serif text-char mb-6">
@@ -92,9 +97,14 @@ export default async function CheckoutPage({
                 </div>
               ))
             ) : (
-              <p className="text-sm text-gray">
-                No hay ítems asociados a esta reserva.
-              </p>
+              <div className="border-b border-stone-100 pb-3">
+                <p className="font-medium text-char">
+                  {booking.service.name}
+                </p>
+                <p className="text-sm text-gray">
+                  {formatCLP(booking.service.basePrice)}
+                </p>
+              </div>
             )}
           </div>
 
@@ -140,7 +150,6 @@ export default async function CheckoutPage({
             Selecciona cómo quieres pagar tu abono.
           </p>
 
-          {/* 🔥 COMPONENTE FUNCIONAL */}
           <PaymentMethods
             bookingId={booking.id}
             amount={deposit}
@@ -150,7 +159,6 @@ export default async function CheckoutPage({
             Pago 100% seguro · SSL · Soporte internacional
           </p>
         </div>
-
       </section>
     </main>
   );

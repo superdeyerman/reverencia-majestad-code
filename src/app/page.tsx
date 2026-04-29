@@ -167,9 +167,12 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-12">
-            <Button variant="dark" size="lg" asChild>
-              <Link href="/reservar">Ir a reservar</Link>
-            </Button>
+          <Link
+            href="/reserva"
+            className="inline-flex items-center justify-center rounded-full bg-char px-6 py-4 text-white"
+          >
+            Reservar
+          </Link>
           </div>
         </div>
       </section>
