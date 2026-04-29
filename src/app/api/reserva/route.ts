@@ -188,9 +188,9 @@ export async function POST(req: Request) {
 
     const totalAmount = Math.max(subtotal - discount, 0);
 
-    const safeSubtotal = subtotalFromForm > 0 ? subtotal : subtotalFromForm;
-    const safeTotal = totalFromForm > 0 ? totalAmount : totalFromForm;
-
+    const safeSubtotal = subtotalFromForm > 0 ? subtotalFromForm : subtotal;
+    const safeTotal = totalFromForm > 0 ? totalFromForm : totalAmount;
+    
     const depositAmount = 5000;
     const balanceAmount = Math.max(safeTotal - depositAmount, 0);
 

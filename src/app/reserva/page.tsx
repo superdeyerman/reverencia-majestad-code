@@ -87,7 +87,7 @@ export default async function ReservasPage({
       _avg: { rating: true },
       _count: { _all: true },
     }),
-    prisma.booking.count({ where: { status: 'COMPLETED' } }),
+    prisma.reserva.count({ where: { status: 'COMPLETED' } }),
   ]);
 
   const featuredCount = services.filter((s) => s.isFeatured).length;
