@@ -1,157 +1,112 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowRight, Clock3, MapPin, ShieldCheck, Sparkles, Star, Users } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 const trustStats = [
   { icon: Users, value: '500+', label: 'clientes atendidos' },
-  { icon: Star, value: '4.9/5', label: 'promedio de experiencia' },
+  { icon: Star, value: '4.9/5', label: 'experiencia promedio' },
   { icon: MapPin, value: 'Santiago', label: 'domicilio y hotel' },
-];
-
-const reassurancePoints = [
-  'Agenda visible y confirmación inmediata',
-  'Profesionales certificados y protocolo premium',
-  'Atención privada para hogar, suite o evento',
 ];
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#f6f1e8]">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 15% 20%, rgba(201,169,110,0.18), transparent 28%), radial-gradient(circle at 85% 10%, rgba(26,26,26,0.08), transparent 24%), linear-gradient(135deg, rgba(255,255,255,0.52), transparent 40%)',
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute left-[-8rem] top-28 h-72 w-72 rounded-full bg-white/60 blur-3xl"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[-6rem] right-[-4rem] h-80 w-80 rounded-full bg-[#d9bb8b]/20 blur-3xl"
-      />
+    <section className="relative overflow-hidden bg-[#FAF8F5]">
+      <div className="mx-auto grid min-h-[calc(100vh-60px)] max-w-7xl items-center gap-14 px-6 py-16 lg:grid-cols-2 lg:px-12">
+        <div>
+          <p className="mb-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.32em] text-[#C9A96E]">
+            <span className="h-px w-10 bg-[#C9A96E]" />
+            Luxury Hair & Spa Mobile
+          </p>
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-60px)] max-w-7xl items-center gap-16 px-6 py-16 lg:grid-cols-[1.08fr_0.92fr] lg:px-12 lg:py-20">
-        <div className="order-2 lg:order-1">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#c9a96e]/30 bg-white/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.32em] text-[#8e6b3d] backdrop-blur">
-            <Sparkles size={12} />
-            Concierge Beauty & Wellness
-          </div>
-
-          <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[0.97] text-stone-950 sm:text-6xl lg:text-[78px]">
-            Experiencias de
-            <span className="block text-[#b98f53]">belleza privada</span>
-            para hogar, hotel y ocasión especial.
+          <h1 className="max-w-3xl font-serif text-5xl font-light leading-[1.02] text-[#1A1A1A] sm:text-6xl lg:text-[82px]">
+            Belleza privada,
+            <span className="block italic text-[#C9A96E]">agenda concierge</span>
+            y experiencia premium.
           </h1>
 
-          <p className="mt-6 max-w-2xl text-base leading-8 text-stone-600 sm:text-lg">
-            Hair, spa y rituales premium con agenda online, pricing transparente y un equipo que
-            llega donde estés en Santiago. Menos fricción, más deseo, más lujo.
+          <p className="mt-6 max-w-xl text-[15px] leading-8 text-[#6B6B6B]">
+            Servicios capilares, spa y wellness a domicilio, en estudio privado u hoteles.
+            Reserva online, confirma con abono y vive una atención diseñada para sentirse de lujo.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">
-            <Button variant="dark" size="lg" asChild>
-              <Link href="/reservar">
-                <span className="inline-flex items-center gap-2">
-                  Reservar experiencia <ArrowRight size={16} aria-hidden="true" />
-                </span>
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <a href="#servicios">Explorar servicios</a>
-            </Button>
+            <Link href="/reservar">
+              <Button variant="dark" size="lg" className="inline-flex items-center gap-2">
+                Reservar experiencia
+                <ArrowRight size={16} aria-hidden="true" />
+              </Button>
+            </Link>
+
+            <a href="#servicios">
+              <Button variant="outline" size="lg">
+                Explorar servicios
+              </Button>
+            </a>
           </div>
 
-          <div className="mt-10 grid gap-3 sm:max-w-xl">
-            {reassurancePoints.map((point) => (
-              <div
-                key={point}
-                className="flex items-center gap-3 rounded-2xl border border-stone-200/80 bg-white/75 px-4 py-3 backdrop-blur-sm"
-              >
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#c9a96e]/12 text-[#8e6b3d]">
-                  <ShieldCheck size={16} aria-hidden="true" />
-                </span>
-                <span className="text-sm text-stone-700">{point}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-wrap gap-8 border-t border-stone-200 pt-8">
+          <div className="mt-10 flex flex-wrap gap-8 border-t border-[#E2DDD6] pt-8">
             {trustStats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="min-w-[120px]">
-                <div className="flex items-center gap-2 text-[#b98f53]">
-                  <Icon size={15} aria-hidden="true" />
-                  <span className="font-serif text-2xl text-stone-950">{value}</span>
+              <div key={label}>
+                <div className="flex items-center gap-2">
+                  <Icon size={15} className="text-[#C9A96E]" />
+                  <span className="font-serif text-3xl text-[#1A1A1A]">{value}</span>
                 </div>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.24em] text-stone-500">{label}</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.24em] text-[#6B6B6B]">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="order-1 lg:order-2">
-          <div className="relative mx-auto w-full max-w-[540px]">
-            <div className="absolute inset-x-10 top-10 h-full rounded-[2.5rem] border border-white/40 bg-white/20 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/50 bg-white/55 p-3 shadow-[0_35px_100px_rgba(63,47,36,0.18)] backdrop-blur-sm">
-              <div className="relative overflow-hidden rounded-[2rem] bg-[#e9dcc8]">
-                <Image
-                  src="/images/hero.svg"
-                  alt="Servicio premium de belleza a domicilio"
-                  width={900}
-                  height={1200}
-                  preload
-                  quality={90}
-                  sizes="(max-width: 1024px) 100vw, 42vw"
-                  className="h-auto w-full object-cover"
-                />
+        <div className="relative mx-auto w-full max-w-[560px]">
+          <div className="relative min-h-[560px] overflow-hidden rounded-[2.7rem] border border-white bg-[#EDE5DB] shadow-[0_35px_100px_rgba(63,47,36,0.18)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(201,169,110,0.40),transparent_34%),linear-gradient(145deg,#F7F1E8_0%,#D3B783_100%)]" />
 
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1f1a17]/82 via-[#1f1a17]/28 to-transparent p-6 sm:p-7">
-                  <div className="flex items-end justify-between gap-6">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.28em] text-white/70">
-                        Signature arrival
-                      </p>
-                      <p className="mt-2 max-w-xs font-serif text-3xl text-white">
-                        Ritual editorial con llegada, montaje y cierre impecable.
-                      </p>
-                    </div>
-                    <div className="hidden rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-right backdrop-blur sm:block">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-white/60">Desde</p>
-                      <p className="mt-1 font-serif text-2xl text-white">$25.000</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="absolute left-1/2 top-[52%] h-[390px] w-[310px] -translate-x-1/2 -translate-y-1/2 rounded-t-[11rem] rounded-b-[2.5rem] bg-[#1A1A1A]/90 shadow-2xl" />
+            <div className="absolute left-1/2 top-[49%] h-[310px] w-[235px] -translate-x-1/2 -translate-y-1/2 rounded-t-[9rem] rounded-b-[7rem] bg-[#F2D3B8]" />
+            <div className="absolute left-1/2 top-[44%] h-[250px] w-[175px] -translate-x-1/2 -translate-y-1/2 rounded-t-[7rem] rounded-b-[5rem] bg-[#4B3426]" />
+            <div className="absolute left-1/2 top-[66%] h-[210px] w-[240px] -translate-x-1/2 rounded-t-[5rem] bg-white/82 backdrop-blur" />
 
-              <div className="absolute -left-4 top-7 rounded-[1.5rem] border border-stone-200 bg-white px-4 py-4 shadow-[0_20px_50px_rgba(63,47,36,0.12)] sm:-left-8 sm:px-5">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-stone-400">Concierge timing</p>
-                <div className="mt-2 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#c9a96e]/12 text-[#8e6b3d]">
-                    <Clock3 size={16} aria-hidden="true" />
-                  </span>
-                  <div>
-                    <p className="font-serif text-xl text-stone-900">20% abono</p>
-                    <p className="text-xs text-stone-500">Bloquea agenda en minutos</p>
-                  </div>
+            <div className="absolute left-8 top-8 rounded-[1.5rem] border border-[#E2DDD6] bg-white/94 px-5 py-4 shadow-[0_20px_50px_rgba(63,47,36,0.12)]">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-[#9B9288]">Concierge timing</p>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF8F5] text-[#9E7A3F]">
+                  <Clock3 size={16} />
+                </span>
+                <div>
+                  <p className="font-serif text-xl text-[#1A1A1A]">20% abono</p>
+                  <p className="text-xs text-[#6B6B6B]">Bloquea agenda en minutos</p>
                 </div>
-              </div>
-
-              <div className="absolute -bottom-5 right-4 max-w-[250px] rounded-[1.5rem] border border-stone-200 bg-white px-5 py-4 shadow-[0_24px_60px_rgba(63,47,36,0.16)] sm:right-8">
-                <p className="text-[10px] uppercase tracking-[0.24em] text-stone-400">Guest & home loved</p>
-                <div className="mt-2 flex items-center gap-1 text-[#c9a96e]">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star key={index} size={13} className="fill-current" aria-hidden="true" />
-                  ))}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-stone-600">
-                  “La reserva se siente premium desde la primera interacción.”
-                </p>
               </div>
             </div>
+
+            <div className="absolute bottom-6 left-6 right-6 rounded-[1.7rem] border border-white/50 bg-white/78 p-6 backdrop-blur">
+              <p className="text-[11px] uppercase tracking-[0.30em] text-[#C9A96E]">
+                Signature arrival
+              </p>
+              <p className="mt-2 font-serif text-3xl text-[#1A1A1A]">
+                Ritual editorial con llegada, montaje y cierre impecable.
+              </p>
+            </div>
+
+            <div className="absolute right-8 top-8 rounded-[1.3rem] border border-white/60 bg-white/88 px-5 py-4 shadow-[0_20px_50px_rgba(63,47,36,0.10)]">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#9B9288]">Disponible hoy</p>
+              <div className="mt-3 space-y-2 text-sm text-[#1A1A1A]">
+                <p><span className="text-[#4A7C59]">●</span> Color</p>
+                <p><span className="text-[#4A7C59]">●</span> Spa capilar</p>
+                <p><span className="text-[#C9873A]">●</span> Alisado</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute -bottom-6 right-6 max-w-[260px] rounded-[1.5rem] border border-[#E2DDD6] bg-white px-5 py-4 shadow-[0_24px_60px_rgba(63,47,36,0.16)]">
+            <div className="flex items-center gap-1 text-[#C9A96E]">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star key={index} size={13} className="fill-current" />
+              ))}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">
+              “La reserva se siente premium desde la primera interacción.”
+            </p>
           </div>
         </div>
       </div>

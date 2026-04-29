@@ -60,7 +60,7 @@ export default function ServicesSection({ services }: { services: FeaturedServic
             return (
               <article
                 key={service.id}
-                className="relative flex flex-col rounded-[1.8rem] border border-stone-200 bg-[#faf7f2] p-6 shadow-[0_14px_40px_rgba(63,47,36,0.05)] hover:shadow-[0_20px_60px_rgba(63,47,36,0.10)] transition-shadow"
+                className="relative flex flex-col rounded-[2rem] border border-stone-200 bg-white p-7 shadow-[0_12px_35px_rgba(63,47,36,0.05)] hover:shadow-[0_28px_80px_rgba(63,47,36,0.12)] hover:-translate-y-1 transition-all duration-300"
               >
                 {service.isFeatured && (
                   <span className="absolute -top-3 left-5 inline-flex items-center gap-1 rounded-full border border-[#c9a96e]/30 bg-white px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-[#b98f53]">
@@ -76,12 +76,11 @@ export default function ServicesSection({ services }: { services: FeaturedServic
                   {categoryLabel}
                 </p>
 
-                <h3 className="font-serif text-xl text-stone-950 leading-snug mb-3">
+               <h3 className="font-serif text-[22px] tracking-tight text-stone-950">
                   {service.name}
                 </h3>
 
-                <p className="text-sm text-stone-600 leading-relaxed flex-1 mb-5 line-clamp-3">
-                  {service.description}
+                <p className="text-[14px] text-stone-600 leading-[1.7] ...">                  {service.description}
                 </p>
 
                 <div className="flex items-center justify-between border-t border-stone-200 pt-4">
@@ -105,11 +104,11 @@ export default function ServicesSection({ services }: { services: FeaturedServic
           })}
         </div>
 
-        <div className="mt-12 text-center">
-          <Button variant="outline" size="md" asChild>
-            <Link href="/servicios">Ver todos los servicios</Link>
-          </Button>
-        </div>
+       <Link href="/servicios">
+        <Button variant="outline" size="md">
+          Ver todos los servicios
+        </Button>
+        </Link>
 
       </div>
     </section>

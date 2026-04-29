@@ -1,13 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 
-declare global {
-  var prisma: PrismaClient | undefined;
-}
+// Evita múltiples instancias en desarrollo (Next.js hot reload)
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
 export const prisma =
-  global.prisma ||
+  globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "warn", "error"]
+        : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") global.prisma = prisma;
+// En desarrollo guarda la instancia global
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

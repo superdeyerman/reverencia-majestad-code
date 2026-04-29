@@ -118,10 +118,7 @@ const testimonials = [
 ];
 
 export default async function HomePage() {
-  const featuredServices = await prisma.service.findMany({
-    where: { isActive: true, isFeatured: true },
-    orderBy: [{ category: 'asc' }, { basePrice: 'asc' }],
-    take: 8,
+  const featuredServices = await prisma.service.findMany({    
     select: {
       id: true,
       slug: true,

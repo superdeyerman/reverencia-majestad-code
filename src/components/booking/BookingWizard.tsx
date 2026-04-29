@@ -71,9 +71,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   BODY_TREATMENTS: "Tratamientos Corporales",
 };
 
-type ForWhom = "self" | "couple" | "mother" | "reduced" | "gift";
+type ForWhom = "all" | "self" | "couple" | "mother" | "reduced" | "gift";
 
 const forWhomOptions: Array<{ value: ForWhom; label: string; icon: typeof User }> = [
+  { value: "all", label: "Ver todo", icon: Sparkles },
   { value: "self", label: "Para mí", icon: User },
   { value: "couple", label: "Pareja", icon: Heart },
   { value: "mother", label: "Madre reciente", icon: Baby },
@@ -81,13 +82,43 @@ const forWhomOptions: Array<{ value: ForWhom; label: string; icon: typeof User }
   { value: "gift", label: "Regalo", icon: Gift },
 ];
 
-const suggestionByProfile: Record<ForWhom, string[]> = {
-  self: ["Masaje Relajante · Ideal para hoy", "Skin ritual express", "Hair gloss + peinado"],
-  couple: ["Spa parejas", "Ritual romance en hotel", "Wellness + styling"],
-  mother: ["Postparto delicado", "Masaje reconfortante", "Skincare calmante"],
-  reduced: ["Atención adaptada domicilio", "Wellness suave", "Protocolo accesible"],
-  gift: ["Gift experience premium", "Ritual sorpresa", "Pack deluxe"],
-};
+// Filtros REALES sobre el catálogo cargado desde Prisma.
+// Cada perfil selecciona servicios del catálogo por categoría/modalidad; si no hay match, cae a "all".
+function filterServicesByProfile(list: ServiceOption[], profile: ForWhom): ServiceOption[] {
+  switch (profile) {
+    case "self":
+      // Priorizar wellness/skincare de experiencia individual
+      return list.filter(
+        (s) =>
+          s.category === ServiceCategory.WELLNESS ||
+          s.category === ServiceCategory.SKINCARE ||
+          s.category === ServiceCategory.BEAUTY,
+      );
+    case "couple":
+      // Servicios que soportan hotel o pareja (slug incluye "parejas", "romance", "couple" o "couples")
+      return list.filter(
+        (s) =>
+          /parej|romance|couple/i.test(s.slug + " " + s.name) ||
+          (s.supportsHotel && s.category === ServiceCategory.WELLNESS),
+      );
+    case "mother":
+      // Servicios delicados/postparto o wellness a domicilio
+      return list.filter(
+        (s) =>
+          /postparto|madre|prenatal|maternal/i.test(s.slug + " " + s.name) ||
+          (s.supportsHome && s.category === ServiceCategory.WELLNESS),
+      );
+    case "reduced":
+      // Servicios que llegan a domicilio (accesibles)
+      return list.filter((s) => s.supportsHome);
+    case "gift":
+      // Destacados y de mayor valor (experiencia premium para regalar)
+      return list.filter((s) => s.isFeatured || s.basePrice >= 80000);
+    case "all":
+    default:
+      return list;
+  }
+}
 
 export default function BookingWizard({
   services,
@@ -102,7 +133,7 @@ export default function BookingWizard({
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [slots, setSlots] = useState<Array<{ slot: string; available: boolean; professionals: number }>>([]);
-  const [forWhom, setForWhom] = useState<ForWhom>("self");
+  const [forWhom, setForWhom] = useState<ForWhom>("all");
   const [quoteResult, setQuoteResult] = useState<QuoteResult | null>(null);
   const [isQuoting, setIsQuoting] = useState(false);
 
@@ -133,16 +164,18 @@ export default function BookingWizard({
     [services, selectedServiceIds],
   );
 
+  // Filtro combinado: perfil "forWhom" (real, sobre catálogo) + búsqueda textual.
   const filteredServices = useMemo(() => {
+    const base = filterServicesByProfile(services, forWhom);
     const q = deferredSearch.trim().toLowerCase();
-    if (!q) return services;
-    return services.filter(
+    if (!q) return base;
+    return base.filter(
       (s) =>
         s.name.toLowerCase().includes(q) ||
         s.description.toLowerCase().includes(q) ||
         (CATEGORY_LABELS[s.category] ?? "").toLowerCase().includes(q),
     );
-  }, [deferredSearch, services]);
+  }, [deferredSearch, services, forWhom]);
 
   const visibleSlots = selectedService && state.date ? slots : [];
 
@@ -344,12 +377,20 @@ export default function BookingWizard({
                 ))}
               </div>
               <div className="mt-4 rounded-2xl border border-[#e8d5b0] bg-white px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-[#9e7a3f]">Sugerencias</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {suggestionByProfile[forWhom].map((s) => (
-                    <span key={s} className="rounded-full border border-stone-200 bg-[#faf7f2] px-3 py-1 text-xs text-stone-700">{s}</span>
-                  ))}
-                </div>
+                <p className="text-[11px] uppercase tracking-[0.25em] text-[#9e7a3f]">
+                  {forWhom === "all" ? "Catálogo completo" : "Coincidencias en el catálogo"}
+                </p>
+                <p className="mt-2 text-xs text-stone-600">
+                  {filteredServices.length === 0 ? (
+                    <>No encontramos servicios para este perfil. Prueba con <button type="button" onClick={() => setForWhom("all")} className="underline underline-offset-2 text-stone-900">Ver todo</button>.</>
+                  ) : (
+                    <>
+                      Mostrando <span className="font-medium text-stone-900">{filteredServices.length}</span>{" "}
+                      {filteredServices.length === 1 ? "servicio compatible" : "servicios compatibles"}
+                      {forWhom !== "all" && " con el perfil seleccionado"}.
+                    </>
+                  )}
+                </p>
               </div>
             </div>
 

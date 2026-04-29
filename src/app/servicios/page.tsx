@@ -83,18 +83,22 @@ export default async function ServiciosPage() {
             certificados que llegan a tu domicilio o habitación de hotel en Santiago.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button variant="dark" size="lg" asChild>
-              <Link href="/reservar">Reservar ahora</Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link href="/estilo">Diagnóstico de estilo AI</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        <Link href="/reservar">
+          <Button variant="dark" size="lg">
+            Reservar ahora
+          </Button>
+        </Link>
 
-      {/* Pillars */}
-      <section className="bg-white border-b border-stone-100">
+        <Link href="/estilo">
+          <Button variant="outline" size="lg">
+            Diagnóstico de estilo AI
+          </Button>
+        </Link>
+      </div>
+      </div>
+  </section>
+    {/* Pillars */}
+   <section className="bg-white border-b border-stone-100">
         <div className="mx-auto max-w-7xl px-6 py-10 lg:px-12">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
@@ -215,22 +219,29 @@ export default async function ServiciosPage() {
           <p className="font-sans text-sm text-white/60 max-w-md mx-auto leading-relaxed mb-10">
             Diseñamos experiencias personalizadas para clientes particulares, suites privadas y eventos corporativos.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href={`https://wa.me/56963929354?text=${encodeURIComponent('Hola, quiero una experiencia personalizada')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-12 items-center justify-center rounded-sm bg-gold px-7 text-base font-sans font-medium tracking-wide text-white transition-all duration-150 hover:bg-gold-dark active:scale-[0.98]"
-            >
-              WhatsApp directo
-            </a>
-            <Button variant="outline" size="lg" className="border-white/20 text-white hover:border-gold hover:text-gold" asChild>
-              <Link href="/estilo">Diagnóstico AI gratuito</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+                  <div className="flex flex-wrap justify-center gap-4">
+          <a
+            href={`https://wa.me/56963929354?text=${encodeURIComponent('Hola, quiero una experiencia personalizada')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-12 items-center justify-center rounded-sm bg-gold px-7 text-base font-sans font-medium tracking-wide text-white transition-all duration-150 hover:bg-gold-dark active:scale-[0.98]"
+          >
+            WhatsApp directo
+          </a>
 
-    </main>
-  );
+          <Link href="/estilo">
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-white/20 text-white hover:border-gold hover:text-gold"
+            >
+              Diagnóstico AI gratuito
+            </Button>
+          </Link>
+        </div>
+
+      </div>
+    </section>
+  </main>
+);
 }

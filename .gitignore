@@ -47,4 +47,45 @@ next-env.d.ts
 gh.exe
 *.exe
 
-.vercel
+# 🔥 AGREGADO IMPORTANTE (TU CASO)
+postman/
+hello-prisma/
+
+# 🔥 TODAS LAS IA / HERRAMIENTAS QUE TE APARECEN
+.adal/
+.agents/
+.aider-desk/
+.augment/
+.bob/
+.codeartsdoer/
+.codebuddy/
+.codemaker/
+.codestudio/
+.commandcode/
+.continue/
+.cortex/
+.crush/
+.devin/
+.factory/
+.forge/
+.goose/
+.iflow/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.rovodev/
+.tabnine/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
